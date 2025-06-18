@@ -43,6 +43,16 @@ We are building several multilib and non-multilib versions:
 
 We aim to provide at least one set of builds per major GCC release (i.e. 13, 14, 15). Since there is no verioning in [`riscv-gnu-toolchain`](https://github.com/riscv-collab/riscv-gnu-toolchain), nightly builds (i.e. `gnu_2025.06.13`) are used as tags.
 
-## Issue Tracking
+## Contributions
+
+### Issue Tracking
 
 If a specific version (i.e. LLVM 21) or configuration (i.e. `rv32imaf_ilp32f`) of a tool is missing please open up new issue!
+
+### Building new toolchains (via Docker)
+
+TODO
+
+### Uploading new toolchains
+
+TODO
