@@ -3,6 +3,13 @@ Binary distributions for RISC-V development tools (GNU/GCC Toolchain, LLVM, Simu
 
 See [Releases](https://github.com/PhilippvK/riscv-tools/releases) or [Tags](https://github.com/PhilippvK/riscv-tools/tags)!
 
+Download links without redirecting (for WGET/CURL) follow this pattern:
+
+```
+https://github.com/PhilippvK/riscv-tools/releases/download/gnu_2025.06.13/riscv64-unknown-linux-glibc-ubuntu-20.04-rv64gc_lp64d_linux_medany.tar.xz
+...
+```
+
 ## Supported OSes
 
 Images for the following OSes are provided:
