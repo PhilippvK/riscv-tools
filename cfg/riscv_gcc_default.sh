@@ -1,0 +1,11 @@
+export GNU_URL=https://github.com/riscv-collab/riscv-gnu-toolchain.git
+# export GNU_REF=master
+export GNU_REF=
+# export GCC_URL=https://gcc.gnu.org/git/gcc.git
+export GCC_URL=
+# export GCC_REF=releases/gcc-13
+export GCC_REF=
+# export BINUTILS_URL=https://sourceware.org/git/binutils-gdb.git
+export BINUTILS_URL=
+# export BINUTILS_REF=binutils-2_40-branch
+export BINUTILS_REF=
