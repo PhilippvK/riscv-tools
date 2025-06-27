@@ -58,6 +58,32 @@ If a specific version (i.e. LLVM 21) or configuration (i.e. `rv32imaf_ilp32f`) o
 
 ### Building new toolchains (via Docker)
 
+#### GCC/GCU
+
+Single build (non-multilib):
+
+```sh
+./build-riscv-tools.sh --compress --force --setup gcc --docker ubuntu:24.04 --dest /path/to/output/gcc_2025.06.13/riscv64-unknown-linux-musl-ubuntu-24.04-rv64gcv_lp64d_linux_musl_medany GNU_REF=2025.06.13 ARCH=rv64gcv ABI=lp64d LINUX=true CMODEL=medany MUSL=true
+```
+
+Single build (multilib):
+
+```sh
+./build-riscv-tools.sh --compress --force --setup gcc --docker ubuntu:22.04 --dest /path/to/output/gcc_2025.06.13/riscv64-unknown-elf-ubuntu-22.04-multilib_large GNU_REF=2025.06.13 MULTILIB=true MULTILIB_LARGE=true
+```
+
+Generate commands automatically:
+
+```sh
+# Edit before to change matrix
+python3 gen_gcc_cmds.py
+```
+
+#### LLVM
+
+```sh
+./build-riscv-tools.sh --docker ubuntu:20.04 --dest /path/to/output/llvm_20.1.7/clang+llvm-20.1.7-x86_64-linux-gnu-ubuntu-20.04/ --compress --setup llvm LLVM_REF=llvmorg-20.1.7
+```
 TODO
 
 ### Uploading new toolchains
