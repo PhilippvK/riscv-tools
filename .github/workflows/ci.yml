@@ -55,7 +55,7 @@ jobs:
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
-    needs: create-releases
+    needs: [create-releases, expand-commands]
     runs-on: ubuntu-latest
     strategy:
       matrix:
