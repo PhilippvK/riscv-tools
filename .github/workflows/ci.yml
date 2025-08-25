@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - id: parse
         run: |
-          releases=$(jq -c '.releases' .github/build_matrix.json)
+          releases=$(jq -c '.releases' .github/build_commands.json)
           echo "releases=$releases" >> $GITHUB_OUTPUT
   create-releases:
     needs: parse-metadata
