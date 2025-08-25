@@ -40,13 +40,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  expand-commands:
+    needs: parse-metadata
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.expand.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: expand
+        run: |
+          releases='${{ needs.parse-metadata.outputs.releases }}'
+          # build [{ "release": {...}, "command": "..."}, ...]
+          matrix=$(echo "$releases" | jq -c '[.[] | {release: ., commands: .commands} | .commands[] as $c | {release: {tag: .release.tag, title: .release.title}, command: $c}]')
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
   build:
     needs: create-releases
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: ${{ fromJson(needs.parse-metadata.outputs.releases) }}
-        command: ${{ fromJson(matrix.release.commands) }}
+      matrix:
+        include: ${{ fromJson(needs.expand-commands.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
