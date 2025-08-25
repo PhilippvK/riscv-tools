@@ -23,7 +23,7 @@
       "title": "ETISS 772073c",
       "dest": "$GITHUB_WORKSPACE/upload/etiss_772073c/",
       "commands": [
-        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 ETISS_URL=https://github.com/PhilippvK/etiss ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04/gnu.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04.tar.xz"
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 ETISS_URL=https://github.com/PhilippvK/etiss ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04.tar.xz"
           ]
     }
   ]
