@@ -17,6 +17,14 @@
         "mkdir -p $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d && ./build-riscv-tools.sh --compress --force --setup gcc htif pk --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d GNU_REF=2025.07.16 ARCH=rv32gc ABI=ilp32d && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d/gnu.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d.tar.xz && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d/htif.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//htif-rv32gc_ilp32d.tar.xz && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32gc_ilp32d/pk.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//pk-rv32gc_ilp32d.tar.xz",
         "mkdir -p $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32 && ./build-riscv-tools.sh --compress --force --setup gcc htif pk --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32 GNU_REF=2025.07.16 ARCH=rv32im_zicsr_zifencei ABI=ilp32 && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32/gnu.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32.tar.xz && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32/htif.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//htif-rv32im_zicsr_zifencei_ilp32.tar.xz && mv $GITHUB_WORKSPACE/upload/gcc_2025.07.16//riscv32-unknown-elf-ubuntu-20.04-rv32im_zicsr_zifencei_ilp32/pk.tar.xz $GITHUB_WORKSPACE/upload/gcc_2025.07.16//pk-rv32im_zicsr_zifencei_ilp32.tar.xz"
           ]
+    },
+    {
+      "tag": "etiss_772073c",
+      "title": "ETISS 772073c",
+      "dest": "$GITHUB_WORKSPACE/upload/etiss_772073c/",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04 ETISS_URL=https://github.com/PhilippvK/etiss ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04/gnu.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c/etiss-ubuntu-20.04.tar.xz"
+          ]
     }
   ]
 }
