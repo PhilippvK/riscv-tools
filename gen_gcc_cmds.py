@@ -1,9 +1,13 @@
 SCRIPT = "./build-riscv-tools.sh"
 
 GITHUB = True
+CI = True
 
 if GITHUB:
-    OUT_DIR = "/nas/lrz/home/ga87puy/RISCV-TC/github"
+    if CI:
+        OUT_DIR = "$GITHUB_WORKSPACE/upload"
+    else:
+        OUT_DIR = "/nas/lrz/home/ga87puy/RISCV-TC/github"
 else:
     OUT_DIR = "/nas/lrz/home/ga87puy/RISCV-TC/syncandshare/GCC/default"
 
