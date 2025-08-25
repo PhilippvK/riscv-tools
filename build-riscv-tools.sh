@@ -27,8 +27,9 @@ CLEANUP=false
 CFG=default
 USER_CFG=
 WORKDIR=
-RISCV_HOST=riscv32-unknown-elf
+RISCV_HOST=auto
 # RISCV_HOST=
+VENDOR=unknown
 ARCH=
 ABI=
 CMODEL=
@@ -41,10 +42,13 @@ MULTILIB_LARGE_GENERATOR="rv32e-ilp32e--zicsr*zifencei rv32ea-ilp32e--zicsr*zife
 ENABLE_GCC=false
 ENABLE_SPIKE=false
 ENABLE_PK=false
+ENABLE_ETISS=false
 ENABLE_LLVM=false
+ENABLE_HTIF=false
 
 CMAKE_GENERATOR=Ninja
 CMAKE_BUILD_TYPE=Release
+GIT_FILTER=true  # TODO
 
 
 
@@ -57,7 +61,7 @@ print_help() {
    # Display Help
    echo "Add description of the script functions here."
    echo
-   echo "Syntax: $0 [--host HOST] [--dest DEST] [--cfg CFG] [--workdir WORKDIR] [--docker IMAGE] [--verbose] [--setup] [--cleanup] [--force] [--compress] [--help] {gcc|llvm|spike|pk}"
+   echo "Syntax: $0 [--host HOST] [--dest DEST] [--cfg CFG] [--workdir WORKDIR] [--docker IMAGE] [--verbose] [--setup] [--cleanup] [--force] [--compress] [--help] {gcc|llvm|spike|pk|htif|etiss}"
    echo "options:"
    echo "--help     Print this Help."
    echo "TODO"
@@ -173,9 +177,12 @@ while [[ $# -gt 0 ]]; do
           value=$(echo $1 | cut -d= -f2)
           USER_CFG="$USER_CFG $key=$value"
           echo "$key=$value"
-      elif [[ "$1" == "gcc" ]]
+      elif [[ "$1" == "gcc" || "$1" == "gnu" ]]
       then
           ENABLE_GCC=true
+      elif [[ "$1" == "htif" ]]
+      then
+          ENABLE_HTIF=true
       elif [[ "$1" == "llvm" ]]
       then
           ENABLE_LLVM=true
@@ -185,6 +192,9 @@ while [[ $# -gt 0 ]]; do
       elif [[ "$1" == "pk" ]]
       then
           ENABLE_PK=true
+      elif [[ "$1" == "etiss" ]]
+      then
+          ENABLE_ETISS=true
       else
           echo "Invalid positional argument: $1"
           exit 1
@@ -213,6 +223,36 @@ then
   export $USER_CFG
 fi
 
+if [[ "$RISCV_HOST" == "auto" ]]
+then
+    XLEN=64
+    if [[ "$MULTILIB" == "true" ]]
+    then
+      XLEN=64
+    else
+      if [[ "$ARCH" != "" ]]
+      then
+        XLEN="${ARCH:2:2}"
+      elif [[ "$ABI" != "" ]]
+      then
+        XLEN="${ABI:2:2}"
+      fi
+    fi
+    HOST_PREFIX="riscv${XLEN}"
+    if [[ "$LINUX" == "true" ]]
+    then
+      if [[ "$MUSL" == "true" ]]
+      then
+        HOST_SUFFIX="linux-musl"
+      else
+        HOST_SUFFIX="linux-glibc"
+      fi
+    else
+      HOST_SUFFIX="elf"
+    fi
+    RISCV_HOST="$HOST_PREFIX-$VENDOR-$HOST_SUFFIX"
+fi
+
 echo "HOST            = ${HOST}"
 echo "DEST            = ${DEST}"
 echo "VERBOSE         = ${VERBOSE}"
@@ -225,6 +265,8 @@ echo "COMPRESS_LEVEL  = ${COMPRESS_LEVEL}"
 echo "COMPRESS_KEEP   = ${COMPRESS_KEEP}"
 echo "FORCE           = ${FORCE}"
 echo "CLEANUP         = ${CLEANUP}"
+echo "RISCV_HOST      = ${RISCV_HOST}"
+echo "VENDOR          = ${VENDOR}"
 echo "ARCH            = ${ARCH}"
 echo "ABI             = ${ABI}"
 echo "CMODEL          = ${CMODEL}"
@@ -235,8 +277,10 @@ echo "MULTILIB_LARGE        = ${MULTILIB_LARGE}"
 echo "MULTILIB_DEFAULT_GENERATOR        = ${MULTILIB_DEFAULT_GENERATOR}"
 echo "MULTILIB_LARGE_GENERATOR        = ${MULTILIB_LARGE_GENERATOR}"
 echo "ENABLE_GCC      = ${ENABLE_GCC}"
+echo "ENABLE_HTIF     = ${ENABLE_HTIF}"
 echo "ENABLE_SPIKE    = ${ENABLE_SPIKE}"
 echo "ENABLE_PK       = ${ENABLE_PK}"
+echo "ENABLE_ETISS    = ${ENABLE_ETISS}"
 echo "ENABLE_LLVM     = ${ENABLE_LLVM}"
 echo "CMAKE_GENERATOR = ${CMAKE_GENERATOR}"
 echo "GNU_URL         = ${GNU_URL}"
@@ -249,6 +293,8 @@ echo "LLVM_URL        = ${LLVM_URL}"
 echo "LLVM_REF        = ${LLVM_REF}"
 echo "SPIKE_URL       = ${SPIKE_URL}"
 echo "SPIKE_REF       = ${SPIKE_REF}"
+echo "ETISS_URL       = ${ETISS_URL}"
+echo "ETISS_REF       = ${ETISS_REF}"
 echo "PK_URL          = ${PK_URL}"
 echo "PK_REF          = ${PK_REF}"
 
@@ -287,7 +333,7 @@ else
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
       version=3.27
       build=7
       ## don't modify from here
@@ -320,7 +366,12 @@ else
     then
       echo "Skipping clone (already exists)"
     else
-      git clone $GNU_URL gnu 2>&1 | tee -a $LOGDIR/gcc.log
+      FILTER_ARGS=""
+      if [[ "$GIT_FILTER" == "true" ]]
+      then
+        FILTER_ARGS="--filter=blob:none"
+      fi
+      git clone $GNU_URL gnu $FILTER_ARGS 2>&1 | tee -a $LOGDIR/gcc.log
     fi
     cd gnu
     if [[ "$GNU_REF" != "" ]]
@@ -328,7 +379,12 @@ else
       git checkout $GNU_REF 2>&1 | tee -a $LOGDIR/gcc.log
     fi
     # git submodule update --init --recursive
-    git submodule update --init --recursive -- binutils gcc glibc dejagnu gdb 2>&1 | tee -a $LOGDIR/gcc.log
+    SUBMODULES="gcc glibc dejagnu gdb"
+    if [[ "$LINUX" == "true" ]]
+    then
+      SUBMODULES="$SUBMODULES glibc"
+    fi
+    git submodule update --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
     if [[ "$GCC_URL" != "" ]]
     then
       echo "SKIP"
@@ -392,6 +448,41 @@ else
     cd ../..
 
     # TODO: allow skipping gdb etc.
+  fi
+  if [[ "$ENABLE_HTIF" == "true" ]]
+  then
+    if [[ -d htif ]]
+    then
+      echo "Skipping clone (already exists)"
+    else
+      git clone $HTIF_URL htif 2>&1 | tee -a $LOGDIR/htif.log
+    fi
+    cd htif
+    if [[ "$HTIF_REF" != "" ]]
+    then
+      git checkout $HTIF_REF 2>&1 | tee -a $LOGDIR/htif.log
+    fi
+    # git submodule update --init --recursive 2>&1 | tee -a $LOGDIR/htif.log
+    MULTILIB_ARGS=
+    MULTILIB_GEN_ARGS=
+    if [[ "$MULTILIB" == "true" ]]
+    then
+      MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib"
+    fi
+    export PATH=$INSTALLDIR/gnu/bin:$PATH
+    mkdir build
+    cd build
+    echo ../configure --prefix=$INSTALLDIR/gnu/$RISCV_HOST --host=$RISCV_HOST $MULTILIB_ARGS 2>&1 | tee -a $LOGDIR/htif.log
+    ../configure --prefix=$INSTALLDIR/gnu/$RISCV_HOST --host=$RISCV_HOST $MULTILIB_ARGS 2>&1 | tee -a $LOGDIR/htif.log
+    make -j`nproc` 2>&1 | tee -a $LOGDIR/htif.log
+    mkdir $INSTALLDIR/htif
+    cp -r ../util/* $INSTALLDIR/htif
+    cp libgloss_htif.a $INSTALLDIR/htif
+    if [[ "$ENABLE_GCC" == "true" ]]
+    then
+      make install 2>&1 | tee -a $LOGDIR/htif.log
+    fi
+    cd ../..
   fi
 
   if [[ "$ENABLE_LLVM" == "true" ]]
@@ -480,12 +571,31 @@ else
     then
       ARCH_ABI_ARGS="$ARCH_ABI_ARGS --with-abi=$ABI"
     fi
+    echo ../configure --prefix=$INSTALLDIR/gnu $HOST_ARGS $ARCH_ABI_ARGS 2>&1 | tee -a $LOGDIR/pk.log
     ../configure --prefix=$INSTALLDIR/gnu $HOST_ARGS $ARCH_ABI_ARGS 2>&1 | tee -a $LOGDIR/pk.log
+    echo make -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
     make -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
     mkdir -p $INSTALLDIR/pk
     cp pk $INSTALLDIR/pk/pk
-    make -j`nproc`
-    make install 2>&1 | tee -a $LOGDIR/pk.log
+  fi
+  if [[ "$ENABLE_ETISS" == "true" ]]
+  then
+    echo "Installing ETISS ..."
+    if [[ -d etiss ]]
+    then
+      echo "Skipping clone (already exists)"
+    else
+      git clone $ETISS_URL etiss 2>&1 | tee -a $LOGDIR/etiss.log
+    fi
+    cd etiss
+    if [[ "$ETISS_REF" != "" ]]
+    then
+      git checkout $ETISS_REF 2>&1 | tee -a $LOGDIR/etiss.log
+    fi
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/etiss -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DPORTABLE_INSTALL=ON 2>&1 | tee -a $LOGDIR/etiss.log
+    cmake --build build -j`nproc` 2>&1 | tee -a $LOGDIR/etiss.log
+    cmake --install build 2>&1 | tee -a $LOGDIR/etiss.log
+    cd ../
   fi
 
   if [[ "$COMPRESS" == "true" ]]
@@ -510,6 +620,8 @@ else
   echo "COMPRESS_KEEP=${COMPRESS_KEEP}" >> $INSTALLDIR/config.sh
   echo "FORCE=${FORCE}" >> $INSTALLDIR/config.sh
   echo "CLEANUP=${CLEANUP}" >> $INSTALLDIR/config.sh
+  echo "RISCV_HOST=${RISCV_HOST}" >> $INSTALLDIR/config.sh
+  echo "VENDOR=${VENDOR}" >> $INSTALLDIR/config.sh
   echo "ARCH=${ARCH}" >> $INSTALLDIR/config.sh
   echo "ABI=${ABI}" >> $INSTALLDIR/config.sh
   echo "CMODEL=${CMODEL}" >> $INSTALLDIR/config.sh
@@ -520,8 +632,10 @@ else
   echo "MULTILIB_DEFAULT_GENERATOR=${MULTILIB_DEFAULT_GENERATOR}" >> $INSTALLDIR/config.sh
   echo "MULTILIB_LARGE_GENERATOR=${MULTILIB_LARGE_GENERATOR}" >> $INSTALLDIR/config.sh
   echo "ENABLE_GCC=${ENABLE_GCC}" >> $INSTALLDIR/config.sh
+  echo "ENABLE_HTIF=${ENABLE_HTIF}" >> $INSTALLDIR/config.sh
   echo "ENABLE_SPIKE=${ENABLE_SPIKE}" >> $INSTALLDIR/config.sh
   echo "ENABLE_PK=${ENABLE_PK}" >> $INSTALLDIR/config.sh
+  echo "ENABLE_ETISS=${ENABLE_ETISS}" >> $INSTALLDIR/config.sh
   echo "ENABLE_LLVM=${ENABLE_LLVM}" >> $INSTALLDIR/config.sh
   echo "CMAKE_GENERATOR=${CMAKE_GENERATOR}" >> $INSTALLDIR/config.sh
   echo "GNU_URL=${GNU_URL}" >> $INSTALLDIR/config.sh
@@ -536,6 +650,10 @@ else
   echo "SPIKE_REF=${SPIKE_REF}" >> $INSTALLDIR/config.sh
   echo "PK_URL=${PK_URL}" >> $INSTALLDIR/config.sh
   echo "PK_REF=${PK_REF}" >> $INSTALLDIR/config.sh
+  echo "ETISS_URL=${ETISS_URL}" >> $INSTALLDIR/config.sh
+  echo "ETISS_REF=${ETISS_REF}" >> $INSTALLDIR/config.sh
+  echo "HTIF_URL=${HTIF_URL}" >> $INSTALLDIR/config.sh
+  echo "HTIF_REF=${HTIF_REF}" >> $INSTALLDIR/config.sh
 
   # Fix permissions
   chmod 644 -R $WORKDIR/install/

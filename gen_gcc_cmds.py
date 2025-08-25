@@ -7,23 +7,38 @@ if GITHUB:
 else:
     OUT_DIR = "/nas/lrz/home/ga87puy/RISCV-TC/syncandshare/GCC/default"
 
-DEFAULT_ARGS = ["--compress", "--force", "--setup", "gcc"]
+
+TOOLS = ["gcc"]
+
+HTIF = True
+PK = True
+
+if HTIF:
+    TOOLS += ["htif"]
+if PK:
+    TOOLS += ["pk"]
+
+DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
+
+
 
 # TODO: auto cleanup?
 
 
 DEFAULT_CONFIG = {}
 
-UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
+# UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
+UBUNTU_VERSIONS = ["20.04", "22.04"]
 # UBUNTU_VERSIONS = ["22.04", "24.04"]
 # UBUNTU_VERSIONS = ["20.04", "22.04"]
 # UBUNTU_VERSIONS = ["20.04"]
 
 # GNU_REF = "2024.09.03"  # random tag with gcc13
 # GNU_REF = "2024.10.23"  # first tag with gcc14
-GNU_REF = "2025.05.10"  # last tag with gcc14
+# GNU_REF = "2025.05.10"  # last tag with gcc14
 # GNU_REF = "2025.05.22"  # first tag with gcc15
 ## GNU_REF = "2025.06.13"  # current latest tag
+GNU_REF = "2025.08.08"
 
 GCC_REF = None
 # GCC_REF = "releases/gcc-13"
@@ -36,23 +51,36 @@ DEFAULT_CONFIG["GNU_REF"] = GNU_REF
 if GCC_REF:
     DEFAULT_CONFIG["GCC_REF"] = GCC_REF
 
+
+RV32 = True
+RV64 = True
+MULTILIB_DEFAULT = False
+MULTILIB_LARGE = False
+NON_MULTILIB = True
+RVV = False
+LINUX = False
+MUSL = True
+GLIBC = True
+
 VARIANTS = [
-    ("multilib_default", {"MULTILIB": True}),
-    ("multilib_default_medany", {"MULTILIB": True, "CMODEL": "medany"}),
-    ("multilib_default_linux_medany", {"MULTILIB": True, "LINUX": True, "CMODEL": "medany"}),
-    ("multilib_large", {"MULTILIB": True, "MULTILIB_LARGE": True}),
-    ("multilib_large_medany", {"MULTILIB": True, "MULTILIB_LARGE": True, "CMODEL": "medany"}),
-    ("multilib_large_linux_medany", {"MULTILIB": True, "MULTILIB_LARGE": True, "LINUX": True, "CMODEL": "medany"}),
-    ("rv32gc_ilp32d", {"ARCH": "rv32gc", "ABI": "ilp32d"}),
-    ("rv32gcv_ilp32d", {"ARCH": "rv32gcv", "ABI": "ilp32d"}),
-    ("rv32im_zicsr_zifencei_ilp32", {"ARCH": "rv32im_zicsr_zifencei", "ABI": "ilp32"}),
-    ("rv32im_zicsr_zifencei_zve32x_ilp32", {"ARCH": "rv32im_zicsr_zifencei_zve32x", "ABI": "ilp32"}),
-    ("rv64gc_lp64d", {"ARCH": "rv64gc", "ABI": "lp64d"}),
-    ("rv64gcv_lp64d", {"ARCH": "rv64gcv", "ABI": "lp64d"}),
-    ("rv64gc_lp64d_linux_medany", {"ARCH": "rv64gc", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany"}),
-    ("rv64gcv_lp64d_linux_medany", {"ARCH": "rv64gcv", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany"}),
-    ("rv64gc_lp64d_linux_musl_medany", {"ARCH": "rv64gc", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany", "MUSL": True}),
-    ("rv64gcv_lp64d_linux_musl_medany", {"ARCH": "rv64gcv", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany", "MUSL": True}),
+    *([("multilib_default", {"MULTILIB": True})] if MULTILIB_DEFAULT else []),
+    *([("multilib_default_medany", {"MULTILIB": True, "CMODEL": "medany"})] if MULTILIB_DEFAULT else []),
+    *([("multilib_default_linux_medany", {"MULTILIB": True, "LINUX": True, "CMODEL": "medany"})] if MULTILIB_DEFAULT and LINUX and GLIBC else []),
+    *([("multilib_default_linux_musl_medany", {"MULTILIB": True, "LINUX": True, "CMODEL": "medany", "MUSL": True})] if MULTILIB_DEFAULT and LINUX and MUSL else []),
+    *([("multilib_large", {"MULTILIB": True, "MULTILIB_LARGE": True})] if MULTILIB_LARGE else []),
+    *([("multilib_large_medany", {"MULTILIB": True, "MULTILIB_LARGE": True, "CMODEL": "medany"})] if MULTILIB_LARGE else []),
+    *([("multilib_large_linux_medany", {"MULTILIB": True, "MULTILIB_LARGE": True, "LINUX": True, "CMODEL": "medany"})] if MULTILIB_LARGE and LINUX and GLIBC else []),
+    *([("multilib_large_linux_musl_medany", {"MULTILIB": True, "MULTILIB_LARGE": True, "LINUX": True, "CMODEL": "medany", "MUSL": True})] if MULTILIB_LARGE and LINUX and MUSL else []),
+    *([("rv32gc_ilp32d", {"ARCH": "rv32gc", "ABI": "ilp32d"})] if NON_MULTILIB and RV32 else []),
+    *([("rv32gcv_ilp32d", {"ARCH": "rv32gcv", "ABI": "ilp32d"})] if NON_MULTILIB and RV32 and RVV else []),
+    *([("rv32im_zicsr_zifencei_ilp32", {"ARCH": "rv32im_zicsr_zifencei", "ABI": "ilp32"})] if NON_MULTILIB and RV32 else []),
+    *([("rv32im_zicsr_zifencei_zve32x_ilp32", {"ARCH": "rv32im_zicsr_zifencei_zve32x", "ABI": "ilp32"})] if NON_MULTILIB and RV32 and RVV else []),
+    *([("rv64gc_lp64d", {"ARCH": "rv64gc", "ABI": "lp64d"})] if NON_MULTILIB and RV64 else []),
+    *([("rv64gcv_lp64d", {"ARCH": "rv64gcv", "ABI": "lp64d"})] if NON_MULTILIB and RV64 and RVV else []),
+    *([("rv64gc_lp64d_linux_medany", {"ARCH": "rv64gc", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany"})] if NON_MULTILIB and RV64 and LINUX and GLIBC else []),
+    *([("rv64gcv_lp64d_linux_medany", {"ARCH": "rv64gcv", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany"})] if NON_MULTILIB and RV64 and RVV and LINUX and GLIBC else []),
+    *([("rv64gc_lp64d_linux_musl_medany", {"ARCH": "rv64gc", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany", "MUSL": True})] if NON_MULTILIB and RV64 and LINUX and MUSL else []),
+    *([("rv64gcv_lp64d_linux_musl_medany", {"ARCH": "rv64gcv", "ABI": "lp64d", "LINUX": True, "CMODEL": "medany", "MUSL": True})] if NON_MULTILIB and RV64 and RVV and LINUX and MUSL else []),
 ]
 
 
@@ -75,7 +103,12 @@ if GITHUB:
         if extra:
             temp = f" ({temp}, {extra})"
     print(f"mkdir -p {dest}")
-    print(f"echo 'RISC-V GNU Tools {temp}' > {dest}/label.txt")
+    LABEL = f"RISC-V GNU Tools {temp}"
+    tools_filtered = [tool.upper() for tool in TOOLS if tool not in ["gcc", "gnu"]]
+    if len(tools_filtered) > 0:
+        tools_str = " + ".join(tools_filtered)
+        LABEL = f"{LABEL} + {tools_str}"
+    print(f"echo '{LABEL}' > {dest}/label.txt")
 
 def config2args(cfg):
     def helper(val):
@@ -94,6 +127,7 @@ for ubuntu_version in UBUNTU_VERSIONS:
         dest_ = f"{dest}/{ubuntu_version}"
     image = f"ubuntu:{ubuntu_version}"
     for variant, variant_config in VARIANTS:
+        triple = None
         if GITHUB:
             arch = variant_config.get("ARCH", "rv64gc")
             abi = variant_config.get("ABI", "lp64d")
@@ -104,7 +138,7 @@ for ubuntu_version in UBUNTU_VERSIONS:
             libc = "" if not linux else ("musl" if musl else "glibc")
             if libc:
                 tc = f"{tc}-{libc}"
-            vendor = "unknown"
+            vendor = "unknown"  # TODO: get from config
             triple = f"riscv{xlen}-{vendor}-{tc}"
             variant_ = variant
             if linux:
@@ -122,7 +156,18 @@ for ubuntu_version in UBUNTU_VERSIONS:
         config_args = config2args(config)
         args = [SCRIPT, *DEFAULT_ARGS, "--docker", image, "--dest", dest__, *config_args]
         cmd = " ".join(args)
-        cmd = f"mkdir -p {dest__} && {cmd} && mv {dest__}/gnu.tar.xz {dest__}.tar.xz"
+        moves = []
+        for tool in TOOLS:
+            if tool in ["gcc", "gnu"]:
+                moves += [f"mv {dest__}/gnu.tar.xz {dest__}.tar.xz"]
+            else:
+                assert GITHUB
+                assert triple is not None
+                assert tool in ["pk", "htif"]
+                tool_dest = dest__.replace(f"{triple}-ubuntu-{ubuntu_version}", tool)
+                moves += [f"mv {dest__}/{tool}.tar.xz {tool_dest}.tar.xz"]
+        move_cmds = " && ".join(moves)
+        cmd = f"mkdir -p {dest__} && {cmd} && {move_cmds}"
         # TODO: rm dir (sudo?)
         cmds.append(cmd)
 
