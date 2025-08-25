@@ -1,0 +1,72 @@
+name: RISC-V GNU Toolchain Builds
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      title: ${{ steps.meta.outputs.title }}
+      dest: ${{ steps.meta.outputs.dest }}
+      commands: ${{ steps.meta.outputs.commands }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Load metadata
+        id: meta
+        run: |
+          tag=$(jq -r '.tag' .github/build_matrix.json)
+          title=$(jq -r '.title' .github/build_matrix.json)
+          dest=$(jq -r '.dest' .github/build_matrix.json)
+          commands=$(jq -c '.commands' .github/build_matrix.json)
+
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "title=$title" >> $GITHUB_OUTPUT
+          echo "dest=$dest" >> $GITHUB_OUTPUT
+          echo "commands=$commands" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release if not exists
+        run: |
+          if ! gh release view "${{ steps.meta.outputs.tag }}" &>/dev/null; then
+            echo "Creating new release ${{ steps.meta.outputs.tag }}"
+            gh release create "${{ steps.meta.outputs.tag }}" \
+              --title "${{ steps.meta.outputs.title }}" \
+              --notes ""
+          else
+            echo "Release ${{ steps.meta.outputs.tag }} already exists"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: prepare-release
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cmd: ${{ fromJSON(needs.prepare-release.outputs.commands) }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run build command
+        run: |
+          echo "Executing: ${{ matrix.cmd }}"
+          eval "${{ matrix.cmd }}"
+
+      - name: Upload artifacts to GitHub Release
+        run: |
+          gh release upload "${{ needs.prepare-release.outputs.tag }}" \
+            ${{ needs.prepare-release.outputs.dest }}/*.tar.xz --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ matrix.cmd }}
+          path: |
+            ${{ needs.prepare-release.outputs.dest }}/*.tar.xz
