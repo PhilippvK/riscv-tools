@@ -51,7 +51,7 @@ jobs:
         run: |
           releases='${{ needs.parse-metadata.outputs.releases }}'
           # build [{ "release": {...}, "command": "..."}, ...]
-          matrix=$(echo "$releases" | jq -c '[.[] | {release: ., commands: .commands} | .commands[] as $c | {release: {tag: .release.tag, title: .release.title}, command: $c}]')
+          matrix=$(echo "$releases" | jq -c '[.[] | {release: ., commands: .commands} | .commands[] as $c | {release: {tag: .release.tag, title: .release.title, dest: .release.dest}, command: $c}]')
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
