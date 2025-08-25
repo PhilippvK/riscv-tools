@@ -18,10 +18,10 @@ jobs:
       - name: Load metadata
         id: meta
         run: |
-          tag=$(jq -r '.tag' .github/build_matrix.json)
-          title=$(jq -r '.title' .github/build_matrix.json)
-          dest=$(jq -r '.dest' .github/build_matrix.json)
-          commands=$(jq -c '.commands' .github/build_matrix.json)
+          tag=$(jq -r '.tag' .github/build_commands.json)
+          title=$(jq -r '.title' .github/build_commands.json)
+          dest=$(jq -r '.dest' .github/build_commands.json)
+          commands=$(jq -c '.commands' .github/build_commands.json)
 
           echo "tag=$tag" >> $GITHUB_OUTPUT
           echo "title=$title" >> $GITHUB_OUTPUT
