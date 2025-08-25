@@ -326,7 +326,8 @@ then
   cp $script $WORKDIR
   cp -r $dir/cfg $WORKDIR/cfg
   # TODO: make rm optional
-  docker run -it --rm -v $WORKDIR:/temp  $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
+  # docker run -it --rm -v $WORKDIR:/temp  $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
+  docker run -i --rm -v $WORKDIR:/temp  $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
 else
   # install git if not available (in docker)
   if [[ "$SETUP" == "true" ]]
