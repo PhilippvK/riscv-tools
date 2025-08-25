@@ -58,6 +58,7 @@ jobs:
     needs: [create-releases, expand-commands]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJson(needs.expand-commands.outputs.matrix) }}
     steps:
