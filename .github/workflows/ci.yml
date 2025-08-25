@@ -3,6 +3,9 @@ name: RISC-V GNU Toolchain Builds
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
