@@ -380,7 +380,8 @@ else
       git checkout $GNU_REF 2>&1 | tee -a $LOGDIR/gcc.log
     fi
     # git submodule update --init --recursive
-    SUBMODULES="gcc glibc dejagnu gdb"
+    # SUBMODULES="gcc glibc dejagnu gdb"
+    SUBMODULES="gcc glibc gdb"
     if [[ "$LINUX" == "true" ]]
     then
       SUBMODULES="$SUBMODULES glibc"
