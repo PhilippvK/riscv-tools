@@ -3,6 +3,8 @@ SCRIPT = "./build-riscv-tools.sh"
 GITHUB = True
 CI = True
 
+JSON = CI and GITHUB
+
 if GITHUB:
     if CI:
         OUT_DIR = "$GITHUB_WORKSPACE/upload"
@@ -124,6 +126,19 @@ def config2args(cfg):
     return [f"{key}={helper(val)}" for key, val in cfg.items()]
 
 
+# from collections import defaultdict
+# release2commands = defaultdict(list)
+json_data = {
+    "releases": [
+        {
+            "tag": tag,
+            "title": LABEL,
+            "dest": f"{OUT_DIR}/{tag}",
+            "commands": [],
+        }
+    ]
+}
+
 for ubuntu_version in UBUNTU_VERSIONS:
     if GITHUB:
         dest_ = dest
@@ -174,5 +189,12 @@ for ubuntu_version in UBUNTU_VERSIONS:
         cmd = f"mkdir -p {dest__} && {cmd} && {move_cmds}"
         # TODO: rm dir (sudo?)
         cmds.append(cmd)
+        json_data["releases"][0]["commands"].append(cmd)
 
-print("\n".join(cmds))
+
+
+if JSON:
+    import json
+    print(json.dumps(json_data, indent=2))
+else:
+    print("\n".join(cmds))
