@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "spike_0bc176b3",
+      "title": "Spike (riscv-isa-sim) 0bc176b3",
+      "dest": "$GITHUB_WORKSPACE/upload/spike_0bc176b3",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup spike --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-20.04 SPIKE_REF=0bc176b3 && mv $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-20.04/spike.tar.xz $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup spike --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-22.04 SPIKE_REF=0bc176b3 && mv $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-22.04/spike.tar.xz $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup spike --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-24.04 SPIKE_REF=0bc176b3 && mv $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-24.04/spike.tar.xz $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "etiss_ea9c108",
+      "title": "ETISS ea9c108",
+      "dest": "$GITHUB_WORKSPACE/upload/etiss_ea9c108",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-20.04 ETISS_REF=ea9c108 && mv $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-20.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-22.04 ETISS_REF=ea9c108 && mv $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-22.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-24.04 ETISS_REF=ea9c108 && mv $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-24.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_ea9c108//etiss-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}

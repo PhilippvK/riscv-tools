@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "llvm_20.1.8",
+      "title": "LLVM 20.1.8",
+      "dest": "$GITHUB_WORKSPACE/upload/llvm_20.1.8",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-20.04 LLVM_REF=llvmorg-20.1.8 && mv $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-20.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-22.04 LLVM_REF=llvmorg-20.1.8 && mv $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-22.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-24.04 LLVM_REF=llvmorg-20.1.8 && mv $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-24.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_20.1.8//clang+llvm-20.1.8-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}
