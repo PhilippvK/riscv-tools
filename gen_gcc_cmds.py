@@ -33,8 +33,8 @@ DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
 
 DEFAULT_CONFIG = {}
 
-# UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
-UBUNTU_VERSIONS = ["20.04", "22.04"]
+UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
+# UBUNTU_VERSIONS = ["20.04", "22.04"]
 # UBUNTU_VERSIONS = ["22.04", "24.04"]
 # UBUNTU_VERSIONS = ["20.04", "22.04"]
 # UBUNTU_VERSIONS = ["20.04"]
@@ -60,11 +60,11 @@ if GCC_REF:
 
 RV32 = True
 RV64 = True
-MULTILIB_DEFAULT = False
-MULTILIB_LARGE = False
+MULTILIB_DEFAULT = True
+MULTILIB_LARGE = True
 NON_MULTILIB = True
-RVV = False
-LINUX = False
+RVV = True
+LINUX = True
 MUSL = True
 GLIBC = True
 
@@ -108,13 +108,15 @@ if GITHUB:
         temp = GNU_REF
         if extra:
             temp = f" ({temp}, {extra})"
-    print(f"mkdir -p {dest}")
+    if not JSON:
+        print(f"mkdir -p {dest}")
     LABEL = f"RISC-V GNU Tools {temp}"
     tools_filtered = [tool.upper() for tool in TOOLS if tool not in ["gcc", "gnu"]]
     if len(tools_filtered) > 0:
         tools_str = " + ".join(tools_filtered)
         LABEL = f"{LABEL} + {tools_str}"
-    print(f"echo '{LABEL}' > {dest}/label.txt")
+    if not JSON:
+        print(f"echo '{LABEL}' > {dest}/label.txt")
 
 def config2args(cfg):
     def helper(val):
