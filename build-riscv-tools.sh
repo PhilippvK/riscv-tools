@@ -452,7 +452,8 @@ else
 
     # TODO: allow skipping gdb etc.
   fi
-  if [[ "$ENABLE_HTIF" == "true" ]]
+  # Automatically skip HTIF for Linux toolchain
+  if [[ "$ENABLE_HTIF" == "true" && "$LINUX" != "true"]]
   then
     if [[ -d htif ]]
     then
