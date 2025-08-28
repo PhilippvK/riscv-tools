@@ -530,6 +530,8 @@ else
     fi
     if [[ "$SPIKE_FIX" != "" ]]
     then
+      git config user.email "you@example.com"
+      git config user.name "Your Name"
       git cherry-pick $SPIKE_FIX
     fi
     mkdir -p build
