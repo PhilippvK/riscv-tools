@@ -334,7 +334,7 @@ else
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
       version=3.27
       build=7
       ## don't modify from here
