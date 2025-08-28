@@ -293,6 +293,7 @@ echo "LLVM_URL        = ${LLVM_URL}"
 echo "LLVM_REF        = ${LLVM_REF}"
 echo "SPIKE_URL       = ${SPIKE_URL}"
 echo "SPIKE_REF       = ${SPIKE_REF}"
+echo "SPIKE_FIX       = ${SPIKE_FIX}"
 echo "ETISS_URL       = ${ETISS_URL}"
 echo "ETISS_REF       = ${ETISS_REF}"
 echo "PK_URL          = ${PK_URL}"
@@ -526,6 +527,10 @@ else
     then
       git checkout $SPIKE_REF 2>&1 | tee -a $LOGDIR/spike.log
     fi
+    if [[ "$SPIKE_FIX" != "" ]]
+    then
+      git cherry-pick $SPIKE_FIX
+    fi
     mkdir -p build
     cd build
     # ../configure --prefix=$INSTALLDIR/spike
@@ -650,6 +655,7 @@ else
   echo "LLVM_REF=${LLVM_REF}" >> $INSTALLDIR/config.sh
   echo "SPIKE_URL=${SPIKE_URL}" >> $INSTALLDIR/config.sh
   echo "SPIKE_REF=${SPIKE_REF}" >> $INSTALLDIR/config.sh
+  echo "SPIKE_FIX=${SPIKE_FIX}" >> $INSTALLDIR/config.sh
   echo "PK_URL=${PK_URL}" >> $INSTALLDIR/config.sh
   echo "PK_REF=${PK_REF}" >> $INSTALLDIR/config.sh
   echo "ETISS_URL=${ETISS_URL}" >> $INSTALLDIR/config.sh
