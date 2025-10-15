@@ -16,7 +16,7 @@ else:
 
 TOOLS = ["gcc"]
 
-HTIF = True
+HTIF = True  # Warning: not compatible with Linux toolchain!
 PK = True
 
 if HTIF:

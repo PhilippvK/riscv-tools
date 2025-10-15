@@ -293,6 +293,7 @@ echo "LLVM_URL        = ${LLVM_URL}"
 echo "LLVM_REF        = ${LLVM_REF}"
 echo "SPIKE_URL       = ${SPIKE_URL}"
 echo "SPIKE_REF       = ${SPIKE_REF}"
+echo "SPIKE_FIX       = ${SPIKE_FIX}"
 echo "ETISS_URL       = ${ETISS_URL}"
 echo "ETISS_REF       = ${ETISS_REF}"
 echo "PK_URL          = ${PK_URL}"
@@ -334,7 +335,7 @@ else
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
       version=3.27
       build=7
       ## don't modify from here
@@ -451,7 +452,8 @@ else
 
     # TODO: allow skipping gdb etc.
   fi
-  if [[ "$ENABLE_HTIF" == "true" ]]
+  # Automatically skip HTIF for Linux toolchain
+  if [[ "$ENABLE_HTIF" == "true" && "$LINUX" != "true" ]]
   then
     if [[ -d htif ]]
     then
@@ -525,6 +527,12 @@ else
     if [[ "$SPIKE_REF" != "" ]]
     then
       git checkout $SPIKE_REF 2>&1 | tee -a $LOGDIR/spike.log
+    fi
+    if [[ "$SPIKE_FIX" != "" ]]
+    then
+      git config user.email "you@example.com"
+      git config user.name "Your Name"
+      git cherry-pick $SPIKE_FIX
     fi
     mkdir -p build
     cd build
@@ -650,6 +658,7 @@ else
   echo "LLVM_REF=${LLVM_REF}" >> $INSTALLDIR/config.sh
   echo "SPIKE_URL=${SPIKE_URL}" >> $INSTALLDIR/config.sh
   echo "SPIKE_REF=${SPIKE_REF}" >> $INSTALLDIR/config.sh
+  echo "SPIKE_FIX=${SPIKE_FIX}" >> $INSTALLDIR/config.sh
   echo "PK_URL=${PK_URL}" >> $INSTALLDIR/config.sh
   echo "PK_REF=${PK_REF}" >> $INSTALLDIR/config.sh
   echo "ETISS_URL=${ETISS_URL}" >> $INSTALLDIR/config.sh

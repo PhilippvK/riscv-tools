@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "etiss_772073c",
+      "title": "ETISS 772073c",
+      "dest": "$GITHUB_WORKSPACE/upload/etiss_772073c",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-20.04 ETISS_URL=https://github.com/PhilippvK/etiss.git ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-20.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-22.04 ETISS_URL=https://github.com/PhilippvK/etiss.git ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-22.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-24.04 ETISS_URL=https://github.com/PhilippvK/etiss.git ETISS_REF=772073c && mv $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-24.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}
