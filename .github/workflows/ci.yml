@@ -69,7 +69,16 @@ jobs:
         include: ${{ fromJson(needs.expand-commands.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: ccache cache files
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${ steps.date.outputs.date }
+          restore-keys: |
+              ccache-
       - name: Run build command
         run: |
           echo "Executing: ${{ matrix.command }}"
