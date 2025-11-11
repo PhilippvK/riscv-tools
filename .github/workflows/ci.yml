@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .ccache
-          key: ccache-${ steps.date.outputs.date }
+          key: ccache-${{ steps.date.outputs.date }}
           restore-keys: |
               ccache-
       - name: Run build command
