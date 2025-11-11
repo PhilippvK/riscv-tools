@@ -572,7 +572,7 @@ else
       echo "Skipping clone (already exists)"
     else
       echo git clone $LLVM_URL llvm 2>&1
-      git clone $LLVM_URL llvm 2>&1 | tee -a $LOGDIR/llvm.log
+      git clone $LLVM_URL llvm --shallow-since='2019-01-01' 2>&1 | tee -a $LOGDIR/llvm.log
       # git clone $LLVM_URL llvm --depth=1 2>&1 | tee -a $LOGDIR/llvm.log
     fi
     cd llvm
