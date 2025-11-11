@@ -45,6 +45,7 @@ ENABLE_PK=false
 ENABLE_ETISS=false
 ENABLE_LLVM=false
 ENABLE_HTIF=false
+SHARED_CCACHE_DIR=
 
 CMAKE_GENERATOR=Ninja
 CMAKE_BUILD_TYPE=Release
@@ -298,6 +299,7 @@ echo "ETISS_URL       = ${ETISS_URL}"
 echo "ETISS_REF       = ${ETISS_REF}"
 echo "PK_URL          = ${PK_URL}"
 echo "PK_REF          = ${PK_REF}"
+echo "SHARED_CCACHE_DIR          = ${SHARED_CCACHE_DIR}"
 
 if [[ ! -z "$HOST" ]]
 then
@@ -324,18 +326,23 @@ if [[ ! -z "$IMAGE" ]]
 then
   echo "Running in docker image: $IMAGE"
   DOCKER_ARGS="$DOCKER_ARGS --dest /temp/install --force --setup"
+  DOCKER_RUN_ARGS="-i --rm -v $WORKDIR:/temp"
+  if [[ "$SHARED_CCACHE_DIR" != "" ]]
+  then
+      DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS -v $SHARED_CCACHE_DIR:$SHARED_CCACHE_DIR"
+  fi
   cp $script $WORKDIR
   cp -r $dir/cfg $WORKDIR/cfg
   # TODO: make rm optional
   # docker run -it --rm -v $WORKDIR:/temp  $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
-  docker run -i --rm -v $WORKDIR:/temp  $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
+  docker run $DOCKER_RUN_ARGS $IMAGE /bin/bash -c "cd /temp && ./build-riscv-tools.sh $DOCKER_ARGS"
 else
   # install git if not available (in docker)
   if [[ "$SETUP" == "true" ]]
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache
       version=3.27
       build=7
       ## don't modify from here
@@ -348,6 +355,40 @@ else
       rm cmake-$version.$build-$os-x86_64.sh
       ls /opt/cmake
       export PATH=/opt/cmake/bin:$PATH
+      # cp ccache /usr/local/bin/
+      # which ccache
+      ln -s $(which ccache) /usr/local/bin/gcc
+      ln -s $(which ccache) /usr/local/bin/g++
+      # which gcc
+      # which g++
+      # which clang
+      # which clang++
+      # echo PATH=$PATH
+      # ls -l /usr/local/bin/gcc
+      # ls -l /usr/local/bin/g++
+      if [[ "$SHARED_CCACHE_DIR" == "" ]]
+      then
+          export CCACHE_DIR=/ccache
+          export CCACHE_TEMPDIR=/ccache
+          ccache -M 8G
+          # echo "max_size = 5.0G\n" > $CCACHE_DIR/ccache.conf
+          # echo "base_dir = $TOP_DIR" >> $CCACHE_DIR/ccache.conf
+          echo "absolute_paths_in_stderr = true" >> $CCACHE_DIR/ccache.conf
+          export CCACHE_LOGFILE=$CCACHE_DIR/ccache.log
+      else
+          export CCACHE_DIR=$SHARED_CCACHE_DIR
+          export CCACHE_TEMPDIR=$SHARED_CCACHE_DIR
+          export CCACHE_LOGFILE=$CCACHE_DIR/ccache.log
+      fi
+      echo "$CCACHE_DIR/ccache.conf:"
+      cat $CCACHE_DIR/ccache.conf || touch $CCACHE_DIR/ccache.conf
+      ccache -s
+      # optimize git performance
+      git config --global core.packedGitLimit 512m
+      git config --global core.packedGitWindowSize 512m
+      git config --global core.bigFileThreshold 50m
+      git config --global pack.windowMemory 100m
+      git config --global pack.packSizeLimit 100m
   fi
   cd $WORKDIR
 
@@ -358,9 +399,11 @@ else
   mkdir -p $LOGDIR
 
   INSTALLDIR=$WORKDIR/install
+  CCACHE_BASEDIR=$WORKDIR
 
   mkdir -p $INSTALLDIR
 
+  ccache -s
   if [[ "$ENABLE_GCC" == "true" ]]
   then
     echo "Installing riscv-gnu-tools ..."
@@ -368,7 +411,7 @@ else
     then
       echo "Skipping clone (already exists)"
     else
-      FILTER_ARGS=""
+      FILTER_ARGS="--shallow-since='2019-01-01'"
       if [[ "$GIT_FILTER" == "true" ]]
       then
         FILTER_ARGS="--filter=blob:none"
@@ -382,12 +425,15 @@ else
     fi
     # git submodule update --init --recursive
     # SUBMODULES="gcc glibc dejagnu gdb"
-    SUBMODULES="gcc glibc gdb"
+    # SUBMODULES="gcc glibc gdb"
+    SUBMODULES="gcc gdb"
+    # newlib?
     if [[ "$LINUX" == "true" ]]
     then
       SUBMODULES="$SUBMODULES glibc"
     fi
-    git submodule update --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
+    # git submodule update --jobs=4 --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
+    git submodule update --depth 1000 --jobs=4 --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
     if [[ "$GCC_URL" != "" ]]
     then
       echo "SKIP"
@@ -452,6 +498,7 @@ else
 
     # TODO: allow skipping gdb etc.
   fi
+  ccache -s
   # Automatically skip HTIF for Linux toolchain
   if [[ "$ENABLE_HTIF" == "true" && "$LINUX" != "true" ]]
   then
@@ -488,7 +535,7 @@ else
     fi
     cd ../..
   fi
-
+  ccache -s
   if [[ "$ENABLE_LLVM" == "true" ]]
   then
     echo "Installing llvm ..."
@@ -514,6 +561,7 @@ else
     cmake --install "$WORKDIR/llvm/build" 2>&1 | tee -a $LOGDIR/llvm.log
     cd ..
   fi
+  ccache -s
   if [[ "$ENABLE_SPIKE" == "true" ]]
   then
     echo "Installing spike (riscv-isa-sim) ..."
@@ -544,6 +592,7 @@ else
     make install
     cd ../..
   fi
+  ccache -s
   if [[ "$ENABLE_PK" == "true" ]]
   then
     echo "Installing proxy kernel (riscv-pk) ..."
@@ -588,6 +637,7 @@ else
     mkdir -p $INSTALLDIR/pk
     cp pk $INSTALLDIR/pk/pk
   fi
+  ccache -s
   if [[ "$ENABLE_ETISS" == "true" ]]
   then
     echo "Installing ETISS ..."
@@ -607,7 +657,7 @@ else
     cmake --install build 2>&1 | tee -a $LOGDIR/etiss.log
     cd ../
   fi
-
+  ccache -s
   if [[ "$COMPRESS" == "true" ]]
   then
     echo "Compress!"
@@ -665,6 +715,7 @@ else
   echo "ETISS_REF=${ETISS_REF}" >> $INSTALLDIR/config.sh
   echo "HTIF_URL=${HTIF_URL}" >> $INSTALLDIR/config.sh
   echo "HTIF_REF=${HTIF_REF}" >> $INSTALLDIR/config.sh
+  echo "SHARED_CCACHE_DIR=${SHARED_CCACHE_DIR}" >> $INSTALLDIR/config.sh
 
   # Fix permissions
   chmod 644 -R $WORKDIR/install/
