@@ -49,6 +49,7 @@ ENABLE_CCACHE=true
 ENABLE_MGCLIENT=false
 ENABLE_CDFG_PASS=false
 SHARED_CCACHE_DIR=
+LLVM_DEPTH=
 
 CMAKE_GENERATOR=Ninja
 CMAKE_BUILD_TYPE=Release
@@ -294,6 +295,7 @@ echo "GCC_REF         = ${GCC_REF}"
 echo "BINUTILS_URL    = ${BINUTILS_URL}"
 echo "BINUTILS_REF    = ${BINUTILS_REF}"
 echo "LLVM_URL        = ${LLVM_URL}"
+echo "LLVM_DEPTH      = ${LLVM_DEPTH}"
 echo "LLVM_REF        = ${LLVM_REF}"
 echo "SPIKE_URL       = ${SPIKE_URL}"
 echo "SPIKE_REF       = ${SPIKE_REF}"
@@ -356,7 +358,7 @@ else
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache libssl-dev
       version=3.27
       build=7
       ## don't modify from here
@@ -564,6 +566,7 @@ else
     cmake --install "$WORKDIR/mgclient/build" 2>&1 | tee -a $LOGDIR/mgclient.log
     cd -
   fi
+  ccache -s
   if [[ "$ENABLE_LLVM" == "true" ]]
   then
     echo "Installing llvm ..."
@@ -572,7 +575,13 @@ else
       echo "Skipping clone (already exists)"
     else
       echo git clone $LLVM_URL llvm 2>&1
-      git clone $LLVM_URL llvm --shallow-since='2019-01-01' 2>&1 | tee -a $LOGDIR/llvm.log
+      # git clone $LLVM_URL llvm --shallow-since='2019-01-01' 2>&1 | tee -a $LOGDIR/llvm.log
+      CLONE_ARGS=""
+      if [[ "$LLVM_DEPTH" != "" && "$LLVM_REF" != "" ]]
+      then
+          CLONE_ARGS="$CLONE_ARGS --depth=$LLVM_DEPTH -b $LLVM_REF"
+      fi
+      git clone $LLVM_URL llvm  2>&1 | tee -a $LOGDIR/llvm.log
       # git clone $LLVM_URL llvm --depth=1 2>&1 | tee -a $LOGDIR/llvm.log
     fi
     cd llvm
@@ -584,6 +593,10 @@ else
     # mkdir build
     # cd build
     CMAKE_EXTRA_ARGS=""
+    if [[ "$ENABLE_CCACHE" == "true" ]]
+    then
+      CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DLLVM_CCACHE_DIR=$CCACHE_DIR -DLLVM_CCACHE_BUILD=ON"
+    fi
     if [[ "$ENABLE_MGCLIENT" == "true" ]]
     then
       MGCLIENT_INSTALL_DIR=$INSTALLDIR/mgclient
@@ -593,6 +606,7 @@ else
     then
       CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DENABLE_CDFG_PASS=ON"
     fi
+    echo cmake -B "$WORKDIR/llvm/build" "$WORKDIR/llvm/llvm/" -G $CMAKE_GENERATOR -DLLVM_ENABLE_PROJECTS="$LLVM_ENABLE_PROJECTS" "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/llvm -DLLVM_TARGETS_TO_BUILD="$LLVM_TARGETS_TO_BUILD" -DLLVM_OPTIMIZED_TABLEGEN=$LLVM_OPTIMIZED_TABLEGEN -DLLVM_ENABLE_ASSERTIONS=$LLVM_ENABLE_ASSERTIONS -DLLVM_CCACHE_BUILD=$LLVM_CCACHE_BUILD -DLLVM_PARALLEL_LINK_JOBS=$LLVM_PARALLEL_LINK_JOBS -DLLVM_BUILD_TOOLS=$LLVM_BUILD_TOOLS -DLLVM_DEFAULT_TARGET_TRIPLE="$LLVM_DEFAULT_TARGET_TRIPLE" -DLLVM_ENABLE_ZSTD="$LLVM_ENABLE_ZSTD" $CMAKE_EXTRA_ARGS
     cmake -B "$WORKDIR/llvm/build" "$WORKDIR/llvm/llvm/" -G $CMAKE_GENERATOR -DLLVM_ENABLE_PROJECTS="$LLVM_ENABLE_PROJECTS" "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/llvm -DLLVM_TARGETS_TO_BUILD="$LLVM_TARGETS_TO_BUILD" -DLLVM_OPTIMIZED_TABLEGEN=$LLVM_OPTIMIZED_TABLEGEN -DLLVM_ENABLE_ASSERTIONS=$LLVM_ENABLE_ASSERTIONS -DLLVM_CCACHE_BUILD=$LLVM_CCACHE_BUILD -DLLVM_PARALLEL_LINK_JOBS=$LLVM_PARALLEL_LINK_JOBS -DLLVM_BUILD_TOOLS=$LLVM_BUILD_TOOLS -DLLVM_DEFAULT_TARGET_TRIPLE="$LLVM_DEFAULT_TARGET_TRIPLE" -DLLVM_ENABLE_ZSTD="$LLVM_ENABLE_ZSTD" $CMAKE_EXTRA_ARGS 2>&1 | tee -a $LOGDIR/llvm.log
 
     cmake --build "$WORKDIR/llvm/build" -j`nproc` 2>&1 | tee -a $LOGDIR/llvm.log
@@ -743,6 +757,7 @@ else
   echo "BINUTILS_URL=${BINUTILS_URL}" >> $INSTALLDIR/config.sh
   echo "BINUTILS_REF=${BINUTILS_REF}" >> $INSTALLDIR/config.sh
   echo "LLVM_URL=${LLVM_URL}" >> $INSTALLDIR/config.sh
+  echo "LLVM_DEPTH=${LLVM_DEPTH}" >> $INSTALLDIR/config.sh
   echo "LLVM_REF=${LLVM_REF}" >> $INSTALLDIR/config.sh
   echo "SPIKE_URL=${SPIKE_URL}" >> $INSTALLDIR/config.sh
   echo "SPIKE_REF=${SPIKE_REF}" >> $INSTALLDIR/config.sh
