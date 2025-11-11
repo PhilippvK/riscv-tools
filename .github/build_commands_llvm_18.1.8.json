@@ -1,0 +1,12 @@
+{
+  "releases": [
+    {
+      "tag": "llvm_18.1.8",
+      "title": "LLVM 18.1.8",
+      "dest": "$GITHUB_WORKSPACE/upload/llvm_18.1.8",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_18.1.8//clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/llvm_18.1.8//clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-24.04 LLVM_REF=llvmorg-18.1.8 && mv $GITHUB_WORKSPACE/upload/llvm_18.1.8//clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-24.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_18.1.8//clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}
