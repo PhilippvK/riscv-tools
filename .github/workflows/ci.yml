@@ -88,7 +88,7 @@ jobs:
           echo "hash=$HASH"
           echo "hash=$HASH" >> "$GITHUB_OUTPUT"
       - name: Get Tags
-        id: tag
+        id: tags
         run: |
           TAG0=$(echo "${{ matrix.release.tag }}" | cut -d_ -f1)
           TAG1=$(echo "${{ matrix.release.tag }}" | cut -d_ -f2-)
