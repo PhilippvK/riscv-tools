@@ -79,14 +79,32 @@ jobs:
         id: os
         run: |
           OS=$(echo "${{ matrix.command }}" | sed -n 's/.*\(ubuntu-[0-9]*\.[0-9]*\).*/\1/p')
-          echo "OS=$OS"
-          echo "::set-output name=os::$OS"
+          echo "os=$OS"
+          echo "os=$OS" >> "$GITHUB_OUTPUT"
+      - name: Get command hash
+        id: hash
+        run: |
+          HASH=$(echo -n "${{ matrix.command }}" | md5sum | cut -f1 -d' ')
+          echo "hash=$HASH"
+          echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+      - name: Get Tags
+        id: tag
+        run: |
+          TAG0=$(echo "${{ matrix.release.tag }}" | cut -d_ -f1)
+          TAG1=$(echo "${{ matrix.release.tag }}" | cut -d_ -f2-)
+          echo "tag0=$TAG0"
+          echo "tag1=$TAG1"
+          echo "tag0=$TAG0" >> "$GITHUB_OUTPUT"
+          echo "tag1=$TAG1" >> "$GITHUB_OUTPUT"
       - name: ccache cache files
         uses: actions/cache@v4
         with:
           path: .ccache
-          key: ccache-${{ steps.os.outputs.os }}-${{ steps.date.outputs.date }}
+          key: ccache-${{ steps.os.outputs.os }}-${{ steps.tags.outputs.tag0 }}-${{ steps.tags.outputs.tag1 }}-${{ steps.hash.outputs.hash }}-${{ steps.date.outputs.date }}
           restore-keys: |
+              ccache-${{ steps.os.outputs.os }}-${{ steps.tags.outputs.tag0 }}-${{ steps.tags.outputs.tag1 }}-${{ steps.hash.outputs.hash }}
+              ccache-${{ steps.os.outputs.os }}-${{ steps.tags.outputs.tag0 }}-${{ steps.tags.outputs.tag1 }}
+              ccache-${{ steps.os.outputs.os }}-${{ steps.tags.outputs.tag0 }}
               ccache-${{ steps.os.outputs.os }}
       - name: Prepare Shared CCache dir
         run: |
