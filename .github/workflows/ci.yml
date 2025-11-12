@@ -12,6 +12,9 @@ on:
 permissions:
   contents: write
 
+env:
+  DEBIAN_FRONTEND: noninteractive
+
 jobs:
   parse-metadata:
     runs-on: ubuntu-latest
@@ -87,6 +90,8 @@ jobs:
               ccache-${{ steps.os.outputs.os }}
       - name: Prepare Shared CCache dir
         run: |
+          sudo apt -qq update
+          sudo apt -qq install -yy ccache
           export CCACHE_DIR=$(pwd)/.ccache
           mkdir -p $CCACHE_DIR
           ccache -M 8G
