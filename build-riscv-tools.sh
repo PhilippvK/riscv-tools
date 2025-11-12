@@ -390,7 +390,7 @@ else
           # echo "max_size = 5.0G\n" > $CCACHE_DIR/ccache.conf
           # echo "base_dir = $TOP_DIR" >> $CCACHE_DIR/ccache.conf
           echo "absolute_paths_in_stderr = true" >> $CCACHE_DIR/ccache.conf
-          echo "compression = true = true" >> $CCACHE_DIR/ccache.conf
+          echo "compression = true" >> $CCACHE_DIR/ccache.conf
           export CCACHE_LOGFILE=$CCACHE_DIR/ccache.log
       else
           export CCACHE_DIR=$SHARED_CCACHE_DIR

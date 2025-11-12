@@ -85,6 +85,13 @@ jobs:
           key: ccache-${{ steps.os.outputs.os }}-${{ steps.date.outputs.date }}
           restore-keys: |
               ccache-${{ steps.os.outputs.os }}
+      - name: Prepare Shared CCache dir
+        run: |
+          export CCACHE_DIR=$(pwd)/.ccache
+          mkdir -p $CCACHE_DIR
+          ccache -M 8G
+          echo "absolute_paths_in_stderr = true" >> $CCACHE_DIR/ccache.conf
+          echo "compression = true" >> $CCACHE_DIR/ccache.conf
       - name: Run build command
         run: |
           echo "Executing: ${{ matrix.command }}"
