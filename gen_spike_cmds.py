@@ -14,7 +14,7 @@ else:
     OUT_DIR = "/nas/lrz/home/ga87puy/RISCV-TC/syncandshare/Spike/default"
 
 
-TOOLS = ["spike"]
+TOOLS = ["spike", "spike_min"]
 
 DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
 # TODO: auto cleanup?
@@ -61,7 +61,7 @@ if GITHUB:
     if not JSON:
         print(f"mkdir -p {dest}")
     LABEL = f"Spike (riscv-isa-sim) {temp}"
-    tools_filtered = [tool.upper() for tool in TOOLS if tool != "spike"]
+    tools_filtered = [tool.upper() for tool in TOOLS if tool not in ["spike", "spike_min"]]
     if len(tools_filtered) > 0:
         tools_str = " + ".join(tools_filtered)
         LABEL = f"{LABEL} + {tools_str}"
@@ -113,6 +113,11 @@ for ubuntu_version in UBUNTU_VERSIONS:
         for tool in TOOLS:
             if tool == "spike":
                 moves += [f"mv {dest__}/spike.tar.xz {dest__}.tar.xz"]
+            elif tool == "spike_min":
+                pre, post = dest__.rsplit("/", 1)
+                post = post.replace("spike", "spike_min")
+                spike_min_dest = pre + "/" + post
+                moves += [f"mv {dest__}/spike_min.tar.xz {spike_min_dest}.tar.xz"]
             else:
                 assert GITHUB
                 assert triple is not None

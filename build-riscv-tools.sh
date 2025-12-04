@@ -41,6 +41,7 @@ MULTILIB_DEFAULT_GENERATOR=""
 MULTILIB_LARGE_GENERATOR="rv32e-ilp32e--zicsr*zifencei rv32ea-ilp32e--zicsr*zifencei rv32eac-ilp32e--zicsr*zifencei rv32ec-ilp32e--zicsr*zifencei rv32em-ilp32e--zicsr*zifencei rv32ema-ilp32e--zicsr*zifencei rv32emac-ilp32e--zicsr*zifencei rv32emc-ilp32e--zicsr*zifencei rv32i-ilp32--zicsr*zifencei rv32ia-ilp32--zicsr*zifencei rv32iac-ilp32--zicsr*zifencei rv32iaf-ilp32f--zicsr*zifencei rv32iafc-ilp32f--zicsr*zifencei rv32iafd-ilp32d--zicsr*zifencei rv32iafdc-ilp32d--zicsr*zifencei rv32ic-ilp32--zicsr*zifencei rv32if-ilp32f--zicsr*zifencei rv32ifc-ilp32f--zicsr*zifencei rv32ifd-ilp32d--zicsr*zifencei rv32ifdc-ilp32d--zicsr*zifencei rv32im-ilp32--zicsr*zifencei rv32ima-ilp32--zicsr*zifencei rv32imaf-ilp32f--zicsr*zifencei rv32imafc-ilp32f--zicsr*zifencei rv32imafd-ilp32d--zicsr*zifencei rv32imafdc-ilp32d--zicsr*zifencei rv32imc-ilp32--zicsr*zifencei rv32imf-ilp32f--zicsr*zifencei rv32imfc-ilp32f--zicsr*zifencei rv32imfd-ilp32d--zicsr*zifencei rv32imfdc-ilp32d--zicsr*zifencei rv64i-lp64--zicsr*zifencei rv64ia-lp64--zicsr*zifencei rv64iac-lp64--zicsr*zifencei rv64iaf-lp64f--zicsr*zifencei rv64iafc-lp64f--zicsr*zifencei rv64iafd-lp64d--zicsr*zifencei rv64iafdc-lp64d--zicsr*zifencei rv64ic-lp64--zicsr*zifencei rv64if-lp64f--zicsr*zifencei rv64ifc-lp64f--zicsr*zifencei rv64ifd-lp64d--zicsr*zifencei rv64ifdc-lp64d--zicsr*zifencei rv64im-lp64--zicsr*zifencei rv64ima-lp64--zicsr*zifencei rv64imac-lp64--zicsr*zifencei rv64imaf-lp64f--zicsr*zifencei rv64imafc-lp64f--zicsr*zifencei rv64imafd-lp64d--zicsr*zifencei rv64imafdc-lp64d--zicsr*zifencei rv64imc-lp64--zicsr*zifencei rv64imf-lp64f--zicsr*zifencei rv64imfc-lp64f--zicsr*zifencei rv64imfd-lp64d--zicsr*zifencei rv64imfdc-lp64d--zicsr*zifencei"
 ENABLE_GCC=false
 ENABLE_SPIKE=false
+ENABLE_SPIKE_MIN=false
 ENABLE_PK=false
 ENABLE_ETISS=false
 ENABLE_LLVM=false
@@ -194,6 +195,9 @@ while [[ $# -gt 0 ]]; do
       elif [[ "$1" == "spike" ]]
       then
           ENABLE_SPIKE=true
+      elif [[ "$1" == "spike_min" ]]
+      then
+          ENABLE_SPIKE_MIN=true
       elif [[ "$1" == "pk" ]]
       then
           ENABLE_PK=true
@@ -284,6 +288,7 @@ echo "MULTILIB_LARGE_GENERATOR        = ${MULTILIB_LARGE_GENERATOR}"
 echo "ENABLE_GCC      = ${ENABLE_GCC}"
 echo "ENABLE_HTIF     = ${ENABLE_HTIF}"
 echo "ENABLE_SPIKE    = ${ENABLE_SPIKE}"
+echo "ENABLE_SPIKE_MIN = ${ENABLE_SPIKE_MIN}"
 echo "ENABLE_PK       = ${ENABLE_PK}"
 echo "ENABLE_ETISS    = ${ENABLE_ETISS}"
 echo "ENABLE_LLVM     = ${ENABLE_LLVM}"
@@ -615,7 +620,7 @@ else
     cd ..
   fi
   ccache -s
-  if [[ "$ENABLE_SPIKE" == "true" ]]
+  if [[ "$ENABLE_SPIKE" == "true" || "$ENABLE_SPIKE_MIN" == "true" ]]
   then
     echo "Installing spike (riscv-isa-sim) ..."
     if [[ -d spike ]]
@@ -640,9 +645,17 @@ else
     # ../configure --prefix=$INSTALLDIR/spike
     ../configure --prefix=$INSTALLDIR/gnu 2>&1 | tee -a $LOGDIR/spike.log
     make -j`nproc` 2>&1 | tee -a $LOGDIR/spike.log
-    mkdir -p $INSTALLDIR/spike
-    cp spike $INSTALLDIR/spike/spike
-    make install
+    if [[ "$ENABLE_SPIKE_MIN" == "true" ]]
+    then
+      mkdir -p $INSTALLDIR/spike_min
+      cp spike $INSTALLDIR/spike_min/spike
+    fi
+    if [[ "$ENABLE_SPIKE" == "true" ]]
+    then
+      mkdir -p $INSTALLDIR/spike
+      cp spike $INSTALLDIR/spike/spike
+      make install
+    fi
     cd ../..
   fi
   ccache -s

@@ -28,7 +28,8 @@ UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
 # UBUNTU_VERSIONS = ["20.04", "22.04"]
 # UBUNTU_VERSIONS = ["20.04"]
 
-LLVM_REF = "llvmorg-20.1.8"
+# LLVM_REF = "llvmorg-20.1.8"
+LLVM_REF = "llvmorg-21.1.7"
 
 CUSTOM_NAME = None
 # CUSTOM_NAME = "2024.09.03"
