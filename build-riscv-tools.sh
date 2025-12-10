@@ -643,7 +643,7 @@ else
     mkdir -p build
     cd build
     # ../configure --prefix=$INSTALLDIR/spike
-    ../configure --prefix=$INSTALLDIR/gnu 2>&1 | tee -a $LOGDIR/spike.log
+    ../configure --prefix=$INSTALLDIR/spike 2>&1 | tee -a $LOGDIR/spike.log
     make -j`nproc` 2>&1 | tee -a $LOGDIR/spike.log
     if [[ "$ENABLE_SPIKE_MIN" == "true" ]]
     then
@@ -653,8 +653,12 @@ else
     if [[ "$ENABLE_SPIKE" == "true" ]]
     then
       mkdir -p $INSTALLDIR/spike
-      cp spike $INSTALLDIR/spike/spike
       make install
+      if [[ "$ENABLE_GCC" == "true" ]]
+      then
+          cp -r $INSTALLDIR/spike/* $INSTALLDIR/gnu/
+      fi
+      cp $INSTALLDIR/spike/bin/spike $INSTALLDIR/spike/spike # optional?
     fi
     cd ../..
   fi
