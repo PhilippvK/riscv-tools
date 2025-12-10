@@ -715,7 +715,7 @@ else
     then
       echo "Skipping clone (already exists)"
     else
-      git clone $ETISS_URL etiss 2>&1 | tee -a $LOGDIR/etiss.log
+      git clone $ETISS_URL etiss --recursive 2>&1 | tee -a $LOGDIR/etiss.log
     fi
     cd etiss
     if [[ "$ETISS_REF" != "" ]]
