@@ -115,6 +115,26 @@ jobs:
           ccache -M 8G
           echo "absolute_paths_in_stderr = true" >> $CCACHE_DIR/ccache.conf
           echo "compression = true" >> $CCACHE_DIR/ccache.conf
+      - name: Remove unused software
+        run: |
+          echo "Available storage before:"
+          sudo df -h
+          echo
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/lib/jvm
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/local/julia*
+          sudo rm -rf /usr/local/share/chromium
+          sudo rm -rf /opt/microsoft /opt/google
+          sudo rm -rf /opt/az
+          sudo rm -rf /usr/local/share/powershell
+          sudo rm -rf /opt/hostedtoolcache
+          echo "Available storage after:"
+          sudo df -h
       - name: Run build command
         run: |
           echo "Executing: ${{ matrix.command }}"
