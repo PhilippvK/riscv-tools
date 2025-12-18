@@ -55,6 +55,8 @@ CUSTOM_NAME = None
 
 DEFAULT_CONFIG["SHARED_CCACHE_DIR"] = "$(pwd)/.ccache"
 DEFAULT_CONFIG["GNU_REF"] = GNU_REF
+DEFAULT_CONFIG["HTIF_URL"] = "https://github.com/PhilippvK/libgloss-htif.git"
+DEFAULT_CONFIG["HTIF_REF"] = "multilib_fix"
 if GCC_REF:
     DEFAULT_CONFIG["GCC_REF"] = GCC_REF
 
