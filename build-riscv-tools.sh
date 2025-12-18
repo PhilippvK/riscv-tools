@@ -543,7 +543,10 @@ else
     MULTILIB_GEN_ARGS=
     if [[ "$MULTILIB" == "true" ]]
     then
-      MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib"
+      # do automatic lookup!
+      # MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib"
+    else
+      MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib=no"
     fi
     export PATH=$INSTALLDIR/gnu/bin:$PATH
     mkdir build
