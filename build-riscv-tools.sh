@@ -545,6 +545,7 @@ else
     then
       # do automatic lookup!
       # MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib"
+      echo
     else
       MULTILIB_ARGS="$MUKTILIB_ARGS --enable-multilib=no"
     fi
