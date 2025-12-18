@@ -704,6 +704,11 @@ else
     ../configure --prefix=$INSTALLDIR/gnu $HOST_ARGS $ARCH_ABI_ARGS 2>&1 | tee -a $LOGDIR/pk.log
     echo make -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
     make -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
+    if [[ "$ENABLE_GCC" == "true" ]]
+    then
+      echo make install -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
+      make install -j`nproc` 2>&1 | tee -a $LOGDIR/pk.log
+    fi
     mkdir -p $INSTALLDIR/pk
     cp pk $INSTALLDIR/pk/pk
   fi
