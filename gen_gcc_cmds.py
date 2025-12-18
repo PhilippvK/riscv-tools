@@ -186,6 +186,10 @@ for ubuntu_version in UBUNTU_VERSIONS:
                 assert GITHUB
                 assert triple is not None
                 assert tool in ["pk", "htif"]
+                is_linux = config.get("LINUX", False)
+                is_htif = tool == "htif"
+                if is_htif and is_linux:
+                    continue
                 tool_dest = dest__.replace(f"{triple}-ubuntu-{ubuntu_version}", tool)
                 moves += [f"mv {dest__}/{tool}.tar.xz {tool_dest}.tar.xz"]
         move_cmds = " && ".join(moves)
