@@ -111,6 +111,8 @@ GIT_FILTER=true  # TODO
 
 #### GCC/GCU
 
+See ? for details.
+
 Single build (non-multilib):
 
 ```sh
@@ -132,10 +134,34 @@ python3 gen_gcc_cmds.py
 
 #### LLVM
 
+See ? for details.
+
 ```sh
 ./build-riscv-tools.sh --docker ubuntu:20.04 --dest /path/to/output/llvm_20.1.7/clang+llvm-20.1.7-x86_64-linux-gnu-ubuntu-20.04/ --compress --setup llvm LLVM_REF=llvmorg-20.1.7
 ```
 TODO
+
+#### HTIF
+
+See ? for details.
+
+*Warning:* Needs a (non-linux) GNU GCC build to be available. If a multilib build is used, one HTIF lib per supported multilib will be generated.
+
+### Proxy Kernel (PK)
+
+*Warning:* Needs a GNU build to be available. Multilib builds are not supported!
+
+#### ETISS
+
+See ? for details.
+
+### Spike/SpikeMin
+
+See ? for details.
+
+The `spike_min` tool will only contain the Spike executable for minimal disk footprint, while the full (`spike`) one will have all all extra binaries and libraries. 
+
+If a GNU toolchain build is available, the Spike binaries (and libs) will also be installed into the toolchain prefix.
 
 ### Uploading new toolchains
 
