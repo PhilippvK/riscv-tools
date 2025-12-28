@@ -1,7 +1,96 @@
-SCRIPT = "./build-riscv-tools.sh"
+import argparse
+from utils import add_common_env_args, config2args
 
-GITHUB = True
-CI = True
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate GCC build commands for RISC-V toolchains"
+    )
+
+    # --- Environment / mode flags ---
+    add_common_env_args(parser)
+
+    # --- Tool selection ---
+    parser.add_argument("--htif", dest="HTIF", action=argparse.BooleanOptionalAction, default=True,
+                        help="Enable HTIF build")
+    parser.add_argument("--pk", dest="PK", action=argparse.BooleanOptionalAction, default=True,
+                        help="Enable proxy kernel (pk) build")
+
+    # --- Versions / refs ---
+    parser.add_argument(
+        "--ubuntu-versions",
+        nargs="+",
+        default=["20.04", "22.04", "24.04"],
+        help="Ubuntu versions to build for"
+    )
+
+    parser.add_argument(
+        "--gnu-ref",
+        default="2025.08.08",
+        help="GNU toolchain git tag or ref"
+    )
+
+    parser.add_argument(
+        "--gcc-ref",
+        default=None,
+        help="Override GCC ref (e.g. releases/gcc-13)"
+    )
+
+    parser.add_argument(
+        "--custom-name",
+        default=None,
+        help="Custom release name override"
+    )
+
+    # --- Architecture / feature selection ---
+    parser.add_argument("--rv32", dest="RV32", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--rv64", dest="RV64", action=argparse.BooleanOptionalAction, default=True)
+
+    parser.add_argument("--multilib-default", dest="MULTILIB_DEFAULT",
+                        action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--multilib-large", dest="MULTILIB_LARGE",
+                        action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--non-multilib", dest="NON_MULTILIB",
+                        action=argparse.BooleanOptionalAction, default=True)
+
+    parser.add_argument("--rvv", dest="RVV", action=argparse.BooleanOptionalAction, default=True)
+
+    parser.add_argument("--linux", dest="LINUX", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--musl", dest="MUSL", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--glibc", dest="GLIBC", action=argparse.BooleanOptionalAction, default=True)
+
+    return parser.parse_args()
+
+args = parse_args()
+
+GITHUB = args.GITHUB
+CI = args.CI
+HTIF = args.HTIF
+PK = args.PK
+
+# UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
+UBUNTU_VERSIONS = args.ubuntu_versions
+# GNU_REF = "2024.09.03"  # random tag with gcc13
+# GNU_REF = "2024.10.23"  # first tag with gcc14
+# GNU_REF = "2025.05.10"  # last tag with gcc14
+# GNU_REF = "2025.05.22"  # first tag with gcc15
+# GNU_REF = "2025.08.08"
+GNU_REF = args.gnu_ref
+# GCC_REF = "releases/gcc-13"
+GCC_REF = args.gcc_ref
+# CUSTOM_NAME = "2024.09.03"
+CUSTOM_NAME = args.custom_name
+
+RV32 = args.RV32
+RV64 = args.RV64
+MULTILIB_DEFAULT = args.MULTILIB_DEFAULT
+MULTILIB_LARGE = args.MULTILIB_LARGE
+NON_MULTILIB = args.NON_MULTILIB
+RVV = args.RVV
+LINUX = args.LINUX
+MUSL = args.MUSL
+GLIBC = args.GLIBC
+
+SCRIPT = "./build-riscv-tools.sh"
 
 JSON = CI and GITHUB
 
@@ -16,9 +105,6 @@ else:
 
 TOOLS = ["gcc"]
 
-HTIF = True  # Warning: not compatible with Linux toolchain!
-PK = True
-
 if HTIF:
     TOOLS += ["htif"]
 if PK:
@@ -32,26 +118,6 @@ DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
 
 
 DEFAULT_CONFIG = {}
-
-UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["20.04"]
-
-# GNU_REF = "2024.09.03"  # random tag with gcc13
-# GNU_REF = "2024.10.23"  # first tag with gcc14
-# GNU_REF = "2025.05.10"  # last tag with gcc14
-# GNU_REF = "2025.05.22"  # first tag with gcc15
-## GNU_REF = "2025.06.13"  # current latest tag
-GNU_REF = "2025.08.08"
-
-GCC_REF = None
-# GCC_REF = "releases/gcc-13"
-
-CUSTOM_NAME = None
-# CUSTOM_NAME = "2024.09.03"
-
 
 DEFAULT_CONFIG["SHARED_CCACHE_DIR"] = "$(pwd)/.ccache"
 DEFAULT_CONFIG["GNU_REF"] = GNU_REF
@@ -120,15 +186,6 @@ if GITHUB:
         LABEL = f"{LABEL} + {tools_str}"
     if not JSON:
         print(f"echo '{LABEL}' > {dest}/label.txt")
-
-def config2args(cfg):
-    def helper(val):
-        if isinstance(val, bool):
-            val = str(val).lower()
-        return val
-
-    assert isinstance(cfg, dict)
-    return [f"{key}={helper(val)}" for key, val in cfg.items()]
 
 
 # from collections import defaultdict

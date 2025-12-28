@@ -1,7 +1,48 @@
-SCRIPT = "./build-riscv-tools.sh"
+import argparse
+from utils import add_common_env_args, config2args
 
-GITHUB = True
-CI = True
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate Spike (riscv-isa-sim) build commands"
+    )
+
+    # Environment / execution mode
+    add_common_env_args(parser)
+
+    # Platform selection
+    parser.add_argument(
+        "--ubuntu-versions",
+        nargs="+",
+        default=["20.04", "22.04", "24.04"],
+        help="Ubuntu versions to build for",
+    )
+
+    # Versioning
+    parser.add_argument(
+        "--spike-ref",
+        default="0bc176b3",
+        help="Spike (riscv-isa-sim) git ref",
+    )
+
+    parser.add_argument(
+        "--custom-name",
+        default=None,
+        help="Override release name",
+    )
+
+    return parser.parse_args()
+
+args = parse_args()
+
+GITHUB = args.GITHUB
+CI = args.CI
+
+UBUNTU_VERSIONS = args.ubuntu_versions
+SPIKE_REF = args.spike_ref
+CUSTOM_NAME = args.custom_name
+
+
+SCRIPT = "./build-riscv-tools.sh"
 
 JSON = CI and GITHUB
 
@@ -21,17 +62,6 @@ DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
 
 
 DEFAULT_CONFIG = {}
-
-UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["20.04"]
-
-SPIKE_REF = "0bc176b3"
-
-CUSTOM_NAME = None
-# CUSTOM_NAME = "2024.09.03"
 
 
 DEFAULT_CONFIG["SPIKE_REF"] = SPIKE_REF
@@ -67,16 +97,6 @@ if GITHUB:
         LABEL = f"{LABEL} + {tools_str}"
     if not JSON:
         print(f"echo '{LABEL}' > {dest}/label.txt")
-
-def config2args(cfg):
-    def helper(val):
-        if isinstance(val, bool):
-            val = str(val).lower()
-        return val
-
-    assert isinstance(cfg, dict)
-    return [f"{key}={helper(val)}" for key, val in cfg.items()]
-
 
 json_data = {
     "releases": [

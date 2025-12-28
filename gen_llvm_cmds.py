@@ -1,7 +1,47 @@
-SCRIPT = "./build-riscv-tools.sh"
+import argparse
+from utils import add_common_env_args, config2args
 
-GITHUB = True
-CI = True
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate LLVM build commands"
+    )
+
+    # Environment / execution mode
+    add_common_env_args(parser)
+
+    # Platform selection
+    parser.add_argument(
+        "--ubuntu-versions",
+        nargs="+",
+        default=["20.04", "22.04", "24.04"],
+        help="Ubuntu versions to build for"
+    )
+
+    # Versioning
+    parser.add_argument(
+        "--llvm-ref",
+        default="llvmorg-21.1.7",
+        help="LLVM git tag or ref (e.g. llvmorg-21.1.7)"
+    )
+
+    parser.add_argument(
+        "--custom-name",
+        default=None,
+        help="Override release name"
+    )
+
+    return parser.parse_args()
+
+args = parse_args()
+
+GITHUB = args.GITHUB
+CI = args.CI
+
+UBUNTU_VERSIONS = args.ubuntu_versions
+LLVM_REF = args.llvm_ref
+CUSTOM_NAME = args.custom_name
+
+SCRIPT = "./build-riscv-tools.sh"
 
 JSON = CI and GITHUB
 
@@ -19,21 +59,7 @@ TOOLS = ["llvm"]
 DEFAULT_ARGS = ["--compress", "--force", "--setup", *TOOLS]
 # TODO: auto cleanup?
 
-
 DEFAULT_CONFIG = {}
-
-UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["22.04", "24.04"]
-# UBUNTU_VERSIONS = ["20.04", "22.04"]
-# UBUNTU_VERSIONS = ["20.04"]
-
-# LLVM_REF = "llvmorg-20.1.8"
-LLVM_REF = "llvmorg-21.1.7"
-
-CUSTOM_NAME = None
-# CUSTOM_NAME = "2024.09.03"
-
 
 DEFAULT_CONFIG["SHARED_CCACHE_DIR"] = "$(pwd)/.ccache"
 DEFAULT_CONFIG["LLVM_REF"] = LLVM_REF
@@ -69,15 +95,6 @@ if GITHUB:
         LABEL = f"{LABEL} + {tools_str}"
     if not JSON:
         print(f"echo '{LABEL}' > {dest}/label.txt")
-
-def config2args(cfg):
-    def helper(val):
-        if isinstance(val, bool):
-            val = str(val).lower()
-        return val
-
-    assert isinstance(cfg, dict)
-    return [f"{key}={helper(val)}" for key, val in cfg.items()]
 
 
 json_data = {
