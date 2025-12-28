@@ -74,7 +74,7 @@ See https://github.com/tum-ei-eda/etiss for details.
 
 See https://github.com/riscv-software-src/riscv-isa-sim for details.
 
-The `spike_min` tool will only contain the Spike executable for minimal disk footprint, while the full (`spike`) one will have all all extra binaries and libraries. 
+The `spike_min` tool will only contain the Spike executable for minimal disk footprint, while the full (`spike`) one will have all all extra binaries and libraries.
 
 #### Versions
 
@@ -158,6 +158,40 @@ Generate commands automatically:
 ```sh
 # Edit before to change matrix
 python3 gen_gcc_cmds.py
+```
+
+Add `--help` to check supported options:
+
+```
+$ python3 gen_gcc_cmds.py -h
+usage: gen_gcc_cmds.py [-h] [--github | --no-github] [--ci | --no-ci] [--htif | --no-htif] [--pk | --no-pk] [--ubuntu-versions UBUNTU_VERSIONS [UBUNTU_VERSIONS ...]] [--gnu-ref GNU_REF]
+                       [--gcc-ref GCC_REF] [--custom-name CUSTOM_NAME] [--rv32 | --no-rv32] [--rv64 | --no-rv64] [--multilib-default | --no-multilib-default]
+                       [--multilib-large | --no-multilib-large] [--non-multilib | --no-non-multilib] [--rvv | --no-rvv] [--linux | --no-linux] [--musl | --no-musl]
+                       [--glibc | --no-glibc]
+
+Generate GCC build commands for RISC-V toolchains
+
+options:
+  -h, --help            show this help message and exit
+  --github, --no-github
+  --ci, --no-ci
+  --htif, --no-htif     Enable HTIF build
+  --pk, --no-pk         Enable proxy kernel (pk) build
+  --ubuntu-versions UBUNTU_VERSIONS [UBUNTU_VERSIONS ...]
+                        Ubuntu versions to build for
+  --gnu-ref GNU_REF     GNU toolchain git tag or ref
+  --gcc-ref GCC_REF     Override GCC ref (e.g. releases/gcc-13)
+  --custom-name CUSTOM_NAME
+                        Custom release name override
+  --rv32, --no-rv32
+  --rv64, --no-rv64
+  --multilib-default, --no-multilib-default
+  --multilib-large, --no-multilib-large
+  --non-multilib, --no-non-multilib
+  --rvv, --no-rvv
+  --linux, --no-linux
+  --musl, --no-musl
+  --glibc, --no-glibc
 ```
 
 #### LLVM
@@ -271,5 +305,3 @@ With appropriate permissions, Releases can be generated based on a JSON descript
 The workflow automatically generates the release and a dynamic build matrix to distribute the different buold commands over all available runners.
 
 GitHub Actions caches are used to minimize the compilation tile for rebuilds (check https://github.com/PhilippvK/riscv-tools/actions/caches). Make sure to change the experiation period of your caches from 7 days to 90 days to avoid loosing caches frequently.
-
-
