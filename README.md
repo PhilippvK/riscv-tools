@@ -22,12 +22,22 @@ Images for the following OSes are provided:
 
 ### LLVM/Clang
 
+See https://github.com/llvm/llvm-project for details.
+
 #### Flags
 
-The following flags are used for building LLVM/Clang:
+The following common flags (see `cfg/llvm_default.sh`) are used for building LLVM/Clang. You can override them via user-defined config files.
 
 ```sh
-TODO
+LLVM_ENABLE_PROJECTS="clang;lld;polly"
+LLVM_TARGETS_TO_BUILD="X86;RISCV;AArch64"
+LLVM_OPTIMIZED_TABLEGEN=ON
+LLVM_ENABLE_ASSERTIONS=OFF
+LLVM_CCACHE_BUILD=OFF
+LLVM_PARALLEL_LINK_JOBS=8
+LLVM_BUILD_TOOLS=ON
+LLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-gnu"
+LLVM_ENABLE_ZSTD=FORCE_ON
 ```
 
 #### Versions
@@ -35,6 +45,8 @@ TODO
 We aim to provide at least one build per major release (i.e. `llvm_19.1.1`, `llvm_20.1.7`).
 
 ### RISC-V GNU Toolchain
+
+See https://github.com/riscv-collab/riscv-gnu-toolchain for details.
 
 #### Variants
 
@@ -45,6 +57,24 @@ We are building several multilib and non-multilib versions:
 - ...
 
 **Why do we need non-multilib builds at all?:** Clang's multilib-support for baremetal RISC-V is either broken or basically non-existent. Hence, multilib GNU toolchains can not be used with LLVM.
+
+### HTIF
+
+See https://github.com/ucb-bar/libgloss-htif for details.
+
+### Proxy Kernel (PK)
+
+See https://github.com/riscv-software-src/riscv-pk for details.
+
+### ETISS
+
+See https://github.com/tum-ei-eda/etiss for details.
+
+### Spike/SpikeMin
+
+See https://github.com/riscv-software-src/riscv-isa-sim for details.
+
+The `spike_min` tool will only contain the Spike executable for minimal disk footprint, while the full (`spike`) one will have all all extra binaries and libraries. 
 
 #### Versions
 
@@ -111,8 +141,6 @@ GIT_FILTER=true  # TODO
 
 #### GCC/GCU
 
-See ? for details.
-
 Single build (non-multilib):
 
 ```sh
@@ -134,35 +162,114 @@ python3 gen_gcc_cmds.py
 
 #### LLVM
 
-See ? for details.
-
 ```sh
 ./build-riscv-tools.sh --docker ubuntu:20.04 --dest /path/to/output/llvm_20.1.7/clang+llvm-20.1.7-x86_64-linux-gnu-ubuntu-20.04/ --compress --setup llvm LLVM_REF=llvmorg-20.1.7
 ```
-TODO
+
+Generate commands automatically:
+
+```sh
+# Edit before to change matrix
+python3 gen_llvm_cmds.py
+```
 
 #### HTIF
 
-See ? for details.
+This is usually beeing build as a part of a GNU/GCC release. See `.github/build_commands_gcc_2025.08.08.json` for example:
 
-*Warning:* Needs a (non-linux) GNU GCC build to be available. If a multilib build is used, one HTIF lib per supported multilib will be generated.
+```sh
+./build-riscv-tools.sh --compress --force --setup gcc htif pk --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/gcc_2025.08.08//riscv64-unknown-elf-ubuntu-20.04-multilib_default SHARED_CCACHE_DIR=$(pwd)/.ccache GNU_REF=2025.08.08 HTIF_URL=https://github.com/PhilippvK/libgloss-htif.git HTIF_REF=multilib_fix MULTILIB=true
+```
 
-### Proxy Kernel (PK)
+*Warning*: A custom [fork](https://github.com/PhilippvK/libgloss-htif.git) of the libgloss-htif repository is used to fix the handling of multilib builds with newer GCC versions. (see overriden `HTIF_URL` config).
+
+#### Proxy Kernel (PK)
+
+This is usually beeing build as a part of a GNU/GCC release. See `.github/build_commands_gcc_2025.08.08.json` for example:
+
+```sh
+./build-riscv-tools.sh --compress --force --setup gcc htif pk --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/gcc_2025.08.08//riscv64-unknown-elf-ubuntu-20.04-multilib_default SHARED_CCACHE_DIR=$(pwd)/.ccache GNU_REF=2025.08.08 HTIF_URL=https://github.com/PhilippvK/libgloss-htif.git HTIF_REF=multilib_fix MULTILIB=true
+```
 
 *Warning:* Needs a GNU build to be available. Multilib builds are not supported!
 
 #### ETISS
 
-See ? for details.
+```sh
+./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_772073c//etiss-x86_64-linux-gnu-ubuntu-20.04 ETISS_URL=https://github.com/PhilippvK/etiss.git ETISS_REF=772073c
+```
 
-### Spike/SpikeMin
+Generate commands automatically:
 
-See ? for details.
+```sh
+# Edit before to change matrix
+python3 gen_etiss_cmds.py
+```
 
-The `spike_min` tool will only contain the Spike executable for minimal disk footprint, while the full (`spike`) one will have all all extra binaries and libraries. 
+#### Spike/SpikeMin
 
-If a GNU toolchain build is available, the Spike binaries (and libs) will also be installed into the toolchain prefix.
+See `.github/build_commands_spike_0bc176b3.json` for example
+
+```sh
+./build-riscv-tools.sh --compress --force --setup spike spike_min --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-20.04 SPIKE_REF=0bc176b3
+```
+
+*Warning:* Old spike versions need a small fix to compile with the more modern GCC version in Ubuntu 24.04+. The config `SPIKE_FIX=0a7bb54` has to be manually added to handle this:
+
+```sh
+./build-riscv-tools.sh --compress --force --setup spike spike_min --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/spike_0bc176b3//spike-x86_64-linux-gnu-ubuntu-24.04 SPIKE_REF=0bc176b3 SPIKE_FIX=0a7bb54
+```
+
+Generate commands automatically:
+
+```sh
+# Edit before to change matrix
+python3 gen_spike_cmds.py
+```
 
 ### Uploading new toolchains
 
-TODO
+In the following, the working directory is expected to be the top level of the `riscv-tools` clone. The following variables have to be predefined (adjust as needed):
+
+```
+TAG=etiss_772073c
+DEST=/path/to/upload/etiss_772073c
+```
+
+#### Manual Flow
+
+First create a tag and release:
+
+```sh
+gh release create "$TAG" --title "$(cat $DEST/label.txt)" --notes ""
+```
+
+Upload all artifacts together (`--clobber` enabled overriding existing files)
+
+```sh
+gh release upload $TAG $DEST/*.tar.xz --clobber
+```
+
+#### With helper scripts
+
+```sh
+create_release.sh $DEST
+update_release.sh $DEST
+```
+
+The tag and title are automatically detected.
+
+### CI-based Automation Flow
+
+With appropriate permissions, Releases can be generated based on a JSON description (e.g. ) utilizing the Github Runner infrastructure. The runners are not very fast (4 cores), but since different toolchain variants or OSes can be build in parallel, they still can lead to a nice alternative, which does not require a powerful local machine.
+
+1. Optional: Generate JSON config file: `python3 gen_gcc_cmds.py > .github/build_commands_gcc_2025.08.08.json`
+2. Visit  https://github.com/PhilippvK/riscv-tools/actions/workflows/ci.yml
+3. Click "Run workflow", enter the path to the JSON file for your release, click start
+4. Wait for workflow completion
+
+The workflow automatically generates the release and a dynamic build matrix to distribute the different buold commands over all available runners.
+
+GitHub Actions caches are used to minimize the compilation tile for rebuilds (check https://github.com/PhilippvK/riscv-tools/actions/caches). Make sure to change the experiation period of your caches from 7 days to 90 days to avoid loosing caches frequently.
+
+
