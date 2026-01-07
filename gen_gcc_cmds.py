@@ -90,6 +90,7 @@ LINUX = args.LINUX
 MUSL = args.MUSL
 GLIBC = args.GLIBC
 
+
 SCRIPT = "./build-riscv-tools.sh"
 
 JSON = CI and GITHUB
@@ -125,17 +126,6 @@ DEFAULT_CONFIG["HTIF_URL"] = "https://github.com/PhilippvK/libgloss-htif.git"
 DEFAULT_CONFIG["HTIF_REF"] = "multilib_fix"
 if GCC_REF:
     DEFAULT_CONFIG["GCC_REF"] = GCC_REF
-
-
-RV32 = True
-RV64 = True
-MULTILIB_DEFAULT = True
-MULTILIB_LARGE = True
-NON_MULTILIB = True
-RVV = True
-LINUX = True
-MUSL = True
-GLIBC = True
 
 VARIANTS = [
     *([("multilib_default", {"MULTILIB": True})] if MULTILIB_DEFAULT else []),
