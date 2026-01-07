@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "llvm_17.0.6",
+      "title": "LLVM 17.0.6",
+      "dest": "$GITHUB_WORKSPACE/upload/llvm_17.0.6",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-20.04 SHARED_CCACHE_DIR=$(pwd)/.ccache LLVM_REF=llvmorg-17.0.6 && mv $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-20.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04 SHARED_CCACHE_DIR=$(pwd)/.ccache LLVM_REF=llvmorg-17.0.6 && mv $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup llvm --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-24.04 SHARED_CCACHE_DIR=$(pwd)/.ccache LLVM_REF=llvmorg-17.0.6 && mv $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-24.04/llvm.tar.xz $GITHUB_WORKSPACE/upload/llvm_17.0.6//clang+llvm-17.0.6-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}
