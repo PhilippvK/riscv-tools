@@ -44,6 +44,7 @@ ENABLE_SPIKE=false
 ENABLE_SPIKE_MIN=false
 ENABLE_PK=false
 ENABLE_ETISS=false
+ENABLE_ETISS_PERF=false
 ENABLE_LLVM=false
 ENABLE_HTIF=false
 ENABLE_CCACHE=true
@@ -67,7 +68,7 @@ print_help() {
    # Display Help
    echo "Add description of the script functions here."
    echo
-   echo "Syntax: $0 [--host HOST] [--dest DEST] [--cfg CFG] [--workdir WORKDIR] [--docker IMAGE] [--verbose] [--setup] [--cleanup] [--force] [--compress] [--help] {gcc|llvm|spike|pk|htif|etiss}"
+   echo "Syntax: $0 [--host HOST] [--dest DEST] [--cfg CFG] [--workdir WORKDIR] [--docker IMAGE] [--verbose] [--setup] [--cleanup] [--force] [--compress] [--help] {gcc|llvm|spike|pk|htif|etiss|etiss_perf}"
    echo "options:"
    echo "--help     Print this Help."
    echo "TODO"
@@ -204,6 +205,9 @@ while [[ $# -gt 0 ]]; do
       elif [[ "$1" == "etiss" ]]
       then
           ENABLE_ETISS=true
+      elif [[ "$1" == "etiss_perf" ]]
+      then
+          ENABLE_ETISS_PERF=true
       else
           echo "Invalid positional argument: $1"
           exit 1
@@ -291,6 +295,7 @@ echo "ENABLE_SPIKE    = ${ENABLE_SPIKE}"
 echo "ENABLE_SPIKE_MIN = ${ENABLE_SPIKE_MIN}"
 echo "ENABLE_PK       = ${ENABLE_PK}"
 echo "ENABLE_ETISS    = ${ENABLE_ETISS}"
+echo "ENABLE_ETISS_PERF = ${ENABLE_ETISS_PERF}"
 echo "ENABLE_LLVM     = ${ENABLE_LLVM}"
 echo "CMAKE_GENERATOR = ${CMAKE_GENERATOR}"
 echo "GNU_URL         = ${GNU_URL}"
@@ -308,6 +313,8 @@ echo "SPIKE_FIX       = ${SPIKE_FIX}"
 echo "LLVM_FIX        = ${LLVM_FIX}"
 echo "ETISS_URL       = ${ETISS_URL}"
 echo "ETISS_REF       = ${ETISS_REF}"
+echo "ETISS_PERF_URL       = ${ETISS_PERF_URL}"
+echo "ETISS_PERF_REF       = ${ETISS_PERF_REF}"
 echo "PK_URL          = ${PK_URL}"
 echo "PK_REF          = ${PK_REF}"
 echo "ENABLE_CCACHE   = ${ENABLE_CCACHE}"
@@ -411,6 +418,7 @@ else
       git config --global pack.windowMemory 100m
       git config --global pack.packSizeLimit 100m
   fi
+  git config --global url."https://github.com/".insteadOf git@github.com:
   cd $WORKDIR
 
   if [[ "$LOGDIR" == "" ]]
@@ -743,6 +751,38 @@ else
     cmake --install build 2>&1 | tee -a $LOGDIR/etiss.log
     cd ../
   fi
+  if [[ "$ENABLE_ETISS_PERF" == "true" ]]
+  then
+    echo "Installing ETISS Perf ..."
+    if [[ -d etiss_perf ]]
+    then
+      echo "Skipping clone (already exists)"
+    else
+      git clone $ETISS_PERF_URL etiss_perf --recursive 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    fi
+    cd etiss_perf
+    if [[ "$ETISS_PERF_REF" != "" ]]
+    then
+      git checkout $ETISS_PERF_REF 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    fi
+    if [[ "$ETISS_URL" != "" ]]
+    then
+      git -C etiss remote set-url origin $ETISS_URL 2>&1 | tee -a $LOGDIR/etiss_perf.log
+      git -C etiss fetch origin 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    fi
+    if [[ "$ETISS_REF" != "" ]]
+    then
+      git -C etiss checkout $ETISS_REF 2>&1 | tee -a $LOGDIR/etiss_perf.log
+      git -C etiss submodule update --init --recursive
+    fi
+    ./setup_simulator.sh
+    cd etiss
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/etiss_perf -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DPORTABLE_INSTALL=ON 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    cmake --build build -j`nproc` 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    cmake --install build 2>&1 | tee -a $LOGDIR/etiss_perf.log
+    tar --dereference --exclude=.git --exclude=.gitmodules --exclude build -czf $INSTALLDIR/etiss_perf_src.tar.gz .
+    cd ../..
+  fi
   ccache -s
   if [[ "$COMPRESS" == "true" ]]
   then
@@ -782,6 +822,7 @@ else
   echo "ENABLE_SPIKE=${ENABLE_SPIKE}" >> $INSTALLDIR/config.sh
   echo "ENABLE_PK=${ENABLE_PK}" >> $INSTALLDIR/config.sh
   echo "ENABLE_ETISS=${ENABLE_ETISS}" >> $INSTALLDIR/config.sh
+  echo "ENABLE_ETISS_PERF=${ENABLE_ETISS_PERF}" >> $INSTALLDIR/config.sh
   echo "ENABLE_LLVM=${ENABLE_LLVM}" >> $INSTALLDIR/config.sh
   echo "CMAKE_GENERATOR=${CMAKE_GENERATOR}" >> $INSTALLDIR/config.sh
   echo "GNU_URL=${GNU_URL}" >> $INSTALLDIR/config.sh
@@ -801,6 +842,8 @@ else
   echo "PK_REF=${PK_REF}" >> $INSTALLDIR/config.sh
   echo "ETISS_URL=${ETISS_URL}" >> $INSTALLDIR/config.sh
   echo "ETISS_REF=${ETISS_REF}" >> $INSTALLDIR/config.sh
+  echo "ETISS_PERF_URL=${ETISS_PERF_URL}" >> $INSTALLDIR/config.sh
+  echo "ETISS_PERF_REF=${ETISS_PERF_REF}" >> $INSTALLDIR/config.sh
   echo "HTIF_URL=${HTIF_URL}" >> $INSTALLDIR/config.sh
   echo "HTIF_REF=${HTIF_REF}" >> $INSTALLDIR/config.sh
   echo "ENABLE_CCACHE=${ENABLE_CCACHE}" >> $INSTALLDIR/config.sh
