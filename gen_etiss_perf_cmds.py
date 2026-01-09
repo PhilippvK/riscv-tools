@@ -146,7 +146,7 @@ for ubuntu_version in UBUNTU_VERSIONS:
             if tool == "etiss_perf":
                 moves += [f"mv {dest__}/etiss_perf.tar.xz {dest__}.tar.xz"]
                 src_dest = dest__.replace(f"x86_64-linux-gnu-ubuntu-{ubuntu_version}", "src")
-                moves += [f"mv {dest__}/etiss_perf_src.tar.xz {src_dest}.tar.xz"]
+                moves += [f"mv {dest__}/etiss_perf_src.tar.gz {src_dest}.tar.gz"]
             else:
                 assert GITHUB
                 assert triple is not None
