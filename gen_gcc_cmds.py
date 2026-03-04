@@ -155,7 +155,7 @@ cmds = []
 
 extra = None
 if GITHUB:
-    tag = f"gcc_{CUSTOM_NAME or GNU_REF}"
+    tag = f"gnu_{CUSTOM_NAME or GNU_REF}"
     if GCC_REF is not None and "releases/gcc-" in GCC_REF:
         gcc_ver = GCC_REF.split("-", 1)[-1]
         extra = f"GCC {gcc_ver}"
