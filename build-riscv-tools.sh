@@ -447,7 +447,12 @@ else
   if [[ "$ENABLE_GCC" == "true" ]]
   then
     echo "Installing riscv-gnu-tools ..."
+    git config --global url."https://sourceware.org/git/newlib-cygwin".insteadOf "https://github.com/bminor/newlib"
     git config --global url."https://sourceware.org/git/".insteadOf "https://github.com/bminor/"
+    # git config --global url."https://sourceware.org/git/binutils-gdb".insteadOf "https://github.com/bminor/binutils-gdb"
+    # git config --global url."https://sourceware.org/git/binutils-gdb.git".insteadOf "https://github.com/bminor/binutils-gdb.git"
+    # git config --global url."https://sourceware.org/git/glibc".insteadOf "https://github.com/bminor/glibc"
+    git config --global --get-regexp url
     if [[ -d gnu ]]
     then
       echo "Skipping clone (already exists)"
@@ -538,6 +543,7 @@ else
         echo "Enable stripping"
         # CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --enable-strip"
     fi
+    # CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --disable-gdb"
     echo ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS"
     ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS" 2>&1 | tee -a $LOGDIR/gcc.log
     make $TARGET_ARG -j`nproc` 2>&1 | tee -a $LOGDIR/gcc.log
@@ -546,7 +552,7 @@ else
         echo find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
         find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
     fi
-    
+
     cd ../..
 
     # TODO: allow skipping gdb etc.
