@@ -67,7 +67,7 @@ GITHUB = args.GITHUB
 CI = args.CI
 HTIF = args.HTIF
 PK = args.PK
-CUSTOM_DOCKER = args.custom_docker
+CUSTOM_DOCKER = args.CUSTOM_DOCKER
 
 # UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
 UBUNTU_VERSIONS = args.ubuntu_versions
