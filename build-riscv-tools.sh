@@ -447,7 +447,7 @@ else
   if [[ "$ENABLE_GCC" == "true" ]]
   then
     echo "Installing riscv-gnu-tools ..."
-    git config --global url."https://sourceware.org/git/".insteadOf "https://github.com/bminor/
+    git config --global url."https://sourceware.org/git/".insteadOf "https://github.com/bminor/"
     if [[ -d gnu ]]
     then
       echo "Skipping clone (already exists)"
