@@ -199,7 +199,7 @@ for ubuntu_version in UBUNTU_VERSIONS:
     else:
         dest_ = f"{dest}/{ubuntu_version}"
     if CUSTOM_DOCKER:
-        image_namespace = "philipvk"  # TODO: expose
+        image_namespace = "philippvk"  # TODO: expose
         image_name = "riscv-tools"
         image_tag = f"ubuntu-{ubuntu_version}"
         image = f"{image_namespace}/{image_name}:{image_tag}"
