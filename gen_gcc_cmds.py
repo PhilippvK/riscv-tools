@@ -57,6 +57,7 @@ def parse_args():
     parser.add_argument("--linux", dest="LINUX", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--musl", dest="MUSL", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--glibc", dest="GLIBC", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--custom-docker", dest="CUSTOM_DOCKER", action=argparse.BooleanOptionalAction, default=True)
 
     return parser.parse_args()
 
@@ -66,6 +67,7 @@ GITHUB = args.GITHUB
 CI = args.CI
 HTIF = args.HTIF
 PK = args.PK
+CUSTOM_DOCKER = args.custom_docker
 
 # UBUNTU_VERSIONS = ["20.04", "22.04", "24.04"]
 UBUNTU_VERSIONS = args.ubuntu_versions
@@ -196,7 +198,15 @@ for ubuntu_version in UBUNTU_VERSIONS:
         dest_ = dest
     else:
         dest_ = f"{dest}/{ubuntu_version}"
-    image = f"ubuntu:{ubuntu_version}"
+    if CUSTOM_DOCKER:
+        image_namespace = "philipvk"  # TODO: expose
+        image_name = "riscv-tools"
+        image_tag = f"ubuntu-{ubuntu_version}"
+        image = f"{image_namespace}/{image_name}:{image_tag}"
+    else:
+        image_name = "ubuntu"
+        image_tag = ubuntu_version
+        image = f"{image_name}:{image_tag}"
     for variant, variant_config in VARIANTS:
         triple = None
         if GITHUB:
