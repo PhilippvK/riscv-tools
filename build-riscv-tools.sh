@@ -535,11 +535,18 @@ else
     CONFIGURE_EXTRA_ARGS=""
     if [[ "$GNU_STRIP" == true ]] # TODO: only for 2025.08.08 and newer...
     then
-        CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --enable-strip"
+        echo "Enable stripping"
+        # CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --enable-strip"
     fi
     echo ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS"
     ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS" 2>&1 | tee -a $LOGDIR/gcc.log
     make $TARGET_ARG -j`nproc` 2>&1 | tee -a $LOGDIR/gcc.log
+    if [[ "$GNU_STRIP" == true ]] # TODO: only for 2025.08.08 and newer...
+    then
+        echo find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
+        find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
+    fi
+    
     cd ../..
 
     # TODO: allow skipping gdb etc.
