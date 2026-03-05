@@ -261,7 +261,9 @@ then
       then
         HOST_SUFFIX="linux-musl"
       else
-        HOST_SUFFIX="linux-glibc"
+        # HOST_SUFFIX="linux-glibc"
+        # TODO: only for new releases?
+        HOST_SUFFIX="linux-gnu"
       fi
     else
       HOST_SUFFIX="elf"

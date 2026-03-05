@@ -216,7 +216,9 @@ for ubuntu_version in UBUNTU_VERSIONS:
             linux = variant_config.get("LINUX", False)
             tc = "linux" if linux else "elf"
             musl = variant_config.get("MUSL", False)
-            libc = "" if not linux else ("musl" if musl else "glibc")
+            #  libc = "" if not linux else ("musl" if musl else "glibc")
+            # TODO: only for new GCCs?
+            libc = "" if not linux else ("musl" if musl else "gnu")
             if libc:
                 tc = f"{tc}-{libc}"
             vendor = "unknown"  # TODO: get from config
