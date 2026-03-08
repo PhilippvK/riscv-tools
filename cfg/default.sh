@@ -7,3 +7,5 @@ cfg_dir="$(dirname "$file")"
 . $cfg_dir/spike_default.sh
 . $cfg_dir/etiss_default.sh
 . $cfg_dir/etiss_perf_default.sh
+
+export DEDUP=false

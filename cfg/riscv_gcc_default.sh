@@ -9,3 +9,4 @@ export GCC_REF=
 export BINUTILS_URL=
 # export BINUTILS_REF=binutils-2_40-branch
 export BINUTILS_REF=
+export GNU_STRIP=true

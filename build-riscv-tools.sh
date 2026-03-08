@@ -12,6 +12,32 @@ dir="$(dirname "$script")"
 export PATH=/usr/local/research/projects/SystemDesign/tools/cmake/3.22.2/bin:$PATH
 
 
+# Helper functions
+function deduplicate_files() {
+	local DUPLICATES=()
+	local DIR=${1}
+	local IFS=$'\n'
+	local LINK_CHECK=""
+
+	readarray -t DUPLICATES < <(for i in `find ${DIR} -type f ! -empty`; do sha1sum ${i}; done | sort | uniq -w 40 --all-repeated=separate)
+
+	for ((i=1; i < ${#DUPLICATES[@]}; i++ )); do
+		if [[ ${DUPLICATES[$i]} == "" ]]; then
+			continue
+		elif [[ ${DUPLICATES[$i-1]} = "" ]]; then
+			continue
+		else
+			LINK_CHECK=$(ls -li "${DUPLICATES[$i]:42}" "${DUPLICATES[$i-1]:42}" |awk '{print $1}' | uniq | wc -l)
+			if [[ ${LINK_CHECK} != "1" ]]; then
+				ln -f "${DUPLICATES[$i-1]:42}" "${DUPLICATES[$i]:42}"
+			fi
+		fi
+	done
+
+	return 0
+}
+
+
 HOST=
 DEST=
 IMAGE=
@@ -22,6 +48,7 @@ COMPRESS=false
 COMPRESS_EXT=tar.xz
 COMPRESS_LEVEL=7
 COMPRESS_KEEP=false
+# TODO: try out xz -e flag for extreme compression search at different levels!
 FORCE=false
 CLEANUP=false
 CFG=default
@@ -55,6 +82,7 @@ LLVM_DEPTH=
 # TODO: move to cfg
 LLVM_STRIP=true
 GNU_STRIP=true
+DEDUP=false
 
 CMAKE_GENERATOR=Ninja
 CMAKE_BUILD_TYPE=Release
@@ -83,10 +111,15 @@ do_compress() {
     COMPRESS_EXT=$2
     COMPRESS_LEVEL=$3
     COMPRESS_KEEP=$4
+    DEDUP=$5
     echo "Compressing $TO_COMPRESS ->  $TO_COMPRESS.$COMPRESS_EXT"
     if [[ "$COMPRESS_EXT" == "tar.xz" ]]
     then
         cd $TO_COMPRESS
+        if [[ "$DEDUP" == true ]]
+        then
+            deduplicate_files $(pwd)
+        fi
         tar cf - * | xz -$COMPRESS_LEVEL --threads=`nproc` -c - > $TO_COMPRESS.$COMPRESS_EXT
         cd -
     # elif [[ "$COMPRESS_EXT" == "tar.gz" ]]
@@ -104,6 +137,7 @@ do_compress() {
     fi
 }
 export -f do_compress
+export -f deduplicate_files
 
 
 POSITIONAL_ARGS=()
@@ -328,6 +362,7 @@ echo "ENABLE_CDFG_PASS = ${ENABLE_CDFG_PASS}"
 echo "SHARED_CCACHE_DIR = ${SHARED_CCACHE_DIR}"
 echo "LLVM_STRIP = ${LLVM_STRIP}"
 echo "GNU_STRIP = ${GNU_STRIP}"
+echo "DEDUP = ${DEDUP}"
 
 
 if [[ "$CCACHE" -eq 1 ]]
@@ -551,8 +586,14 @@ else
     make $TARGET_ARG -j`nproc` 2>&1 | tee -a $LOGDIR/gcc.log
     if [[ "$GNU_STRIP" == true ]] # TODO: only for 2025.08.08 and newer...
     then
-        echo find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
-        find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
+        # old: only strip executable files
+        # echo find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
+        # find $INSTALLDIR/gnu -type f -executable -exec strip --strip-unneeded {} \; || true
+        # new: only strip elf files
+        date
+        echo find $INSTALLDIR/gnu -type f -exec sh -c 'file "$1" | grep -q "ELF" && strip --strip-unneeded "$1"' _ {} \;
+        find $INSTALLDIR/gnu -type f -exec sh -c 'file "$1" | grep -q "ELF" && strip --strip-unneeded "$1"' _ {} \;
+        date
     fi
 
     cd ../..
@@ -827,7 +868,7 @@ else
     echo "Compress!"
     # find $INSTALLDIR -mindepth 1 -maxdepth 1 -type d
     # echo find $INSTALLDIR -mindepth 1 -maxdepth 1 -type d -exec echo bash -c 'do_compress $@' {} $COMPRESS_EXT $COMPRESS_LEVEL $COMPRESS_KEEP \;
-    find $INSTALLDIR -mindepth 1 -maxdepth 1 -type d -exec bash -c 'do_compress {} $0 $1 $2 $3' $COMPRESS_EXT $COMPRESS_LEVEL $COMPRESS_KEEP \;
+    find $INSTALLDIR -mindepth 1 -maxdepth 1 -type d -exec bash -c 'do_compress {} $0 $1 $2 $3 $4' $COMPRESS_EXT $COMPRESS_LEVEL $COMPRESS_KEEP $DEDUP \;
   fi
 
 
@@ -888,6 +929,9 @@ else
   echo "ENABLE_MGCLIENT=${ENABLE_MGCLIENT}" >> $INSTALLDIR/config.sh
   echo "ENABLE_CDFG_PASS=${ENABLE_CDFG_PASS}" >> $INSTALLDIR/config.sh
   echo "SHARED_CCACHE_DIR=${SHARED_CCACHE_DIR}" >> $INSTALLDIR/config.sh
+  echo "LLVM_STRIP=${LLVM_STRIP}" >> $INSTALLDIR/config.sh
+  echo "GNU_STRIP=${GNU_STRIP}" >> $INSTALLDIR/config.sh
+  echo "DEDUP=${DEDUP}" >> $INSTALLDIR/config.sh
 
   # Fix permissions
   chmod 644 -R $WORKDIR/install/
