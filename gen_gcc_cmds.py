@@ -156,8 +156,11 @@ cmds = []
 extra = None
 if GITHUB:
     tag = f"gnu_{CUSTOM_NAME or GNU_REF}"
-    if GCC_REF is not None and "releases/gcc-" in GCC_REF:
-        gcc_ver = GCC_REF.split("-", 1)[-1]
+    if GCC_REF is not None:
+        if "releases/gcc-" in GCC_REF:
+            gcc_ver = GCC_REF.split("-", 1)[-1]
+        else:
+            gcc_ver = GCC_REF
         extra = f"GCC {gcc_ver}"
     dest = f"{OUT_DIR}/{tag}/"
 else:
