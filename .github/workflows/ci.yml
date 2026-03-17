@@ -21,7 +21,7 @@ jobs:
     outputs:
       releases: ${{ steps.parse.outputs.releases }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: parse
         run: |
           releases=$(jq -c '.releases' ${{ github.event.inputs.config }})
@@ -35,7 +35,7 @@ jobs:
       matrix:
         release: ${{ fromJson(needs.parse-metadata.outputs.releases) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Ensure release exists
         run: |
           tag="${{ matrix.release.tag }}"
@@ -55,7 +55,7 @@ jobs:
     outputs:
       matrix: ${{ steps.expand.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: expand
         run: |
           releases='${{ needs.parse-metadata.outputs.releases }}'
@@ -71,7 +71,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.expand-commands.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Get current date
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
