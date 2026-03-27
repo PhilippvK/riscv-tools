@@ -28,6 +28,14 @@ def parse_args():
         default="main",
         help="ETISS Perf git tag or ref"
     )
+    parser.add_argument(
+        "--etiss-url",
+        default=None,
+    )
+    parser.add_argument(
+        "--etiss-perf-url",
+        default=None,
+    )
 
     parser.add_argument(
         "--custom-name",
@@ -45,6 +53,8 @@ CI = args.CI
 UBUNTU_VERSIONS = args.ubuntu_versions
 ETISS_REF = args.etiss_ref
 ETISS_PERF_REF = args.etiss_perf_ref
+ETISS_URL = args.etiss_url
+ETISS_PERF_URL = args.etiss_perf_url
 CUSTOM_NAME = args.custom_name
 
 
@@ -71,6 +81,12 @@ DEFAULT_CONFIG = {}
 
 DEFAULT_CONFIG["ETISS_REF"] = ETISS_REF
 DEFAULT_CONFIG["ETISS_PERF_REF"] = ETISS_PERF_REF
+
+if ETISS_URL:
+    DEFAULT_CONFIG["ETISS_URL"] = ETISS_URL
+
+if ETISS_PERF_URL:
+    DEFAULT_CONFIG["ETISS_PERF_URL"] = ETISS_PERF_URL
 
 
 VARIANTS = [
