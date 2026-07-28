@@ -484,11 +484,29 @@ else
   if [[ "$ENABLE_GCC" == "true" ]]
   then
     echo "Installing riscv-gnu-tools ..."
-    git config --global url."https://sourceware.org/git/newlib-cygwin".insteadOf "https://github.com/bminor/newlib"
-    git config --global url."https://sourceware.org/git/".insteadOf "https://github.com/bminor/"
+    # git config --global url."https://sourceware.org/git/newlib-cygwin".insteadOf "https://github.com/bminor/newlib"
+    # git config --global url."https://sourceware.org/git/".insteadOf "https://github.com/bminor/"
     # git config --global url."https://sourceware.org/git/binutils-gdb".insteadOf "https://github.com/bminor/binutils-gdb"
     # git config --global url."https://sourceware.org/git/binutils-gdb.git".insteadOf "https://github.com/bminor/binutils-gdb.git"
     # git config --global url."https://sourceware.org/git/glibc".insteadOf "https://github.com/bminor/glibc"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-binutils-gdb.git".insteadOf \
+      "https://sourceware.org/git/binutils-gdb.git"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-binutils-gdb.git".insteadOf \
+      "https://sourceware.org/git/binutils-gdb"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf \
+      "https://sourceware.org/git/newlib-cygwin.git"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf \
+      "https://sourceware.org/git/newlib-cygwin"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf \
+      "https://github.com/bminor/newlib.git"
+    git config --global \
+      url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf \
+      "https://github.com/bminor/newlib"
     git config --global --get-regexp url
     if [[ -d gnu ]]
     then
