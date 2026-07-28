@@ -99,7 +99,7 @@ jobs:
           echo "tag0=$TAG0" >> "$GITHUB_OUTPUT"
           echo "tag1=$TAG1" >> "$GITHUB_OUTPUT"
       - name: ccache cache files
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .ccache
           # key: ccache-${{ steps.os.outputs.os }}-${{ steps.tags.outputs.tag0 }}-${{ steps.tags.outputs.tag1 }}-${{ steps.hash.outputs.hash }}-${{ steps.date.outputs.date }}
