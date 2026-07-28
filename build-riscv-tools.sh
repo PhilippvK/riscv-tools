@@ -524,17 +524,18 @@ else
     then
       git checkout $GNU_REF 2>&1 | tee -a $LOGDIR/gcc.log
     fi
-    # git submodule update --init --recursive
-    # SUBMODULES="gcc glibc dejagnu gdb"
-    # SUBMODULES="gcc glibc gdb"
-    SUBMODULES="gcc gdb"
-    # newlib?
+    SUBMODULES=(gcc gdb binutils newlib)
+
     if [[ "$LINUX" == "true" ]]
     then
-      SUBMODULES="$SUBMODULES glibc"
+      SUBMODULES+=(glibc)
     fi
     # git submodule update --jobs=4 --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
-    git submodule update --depth 1000 --jobs=4 --init --recursive -- $SUBMODULES 2>&1 | tee -a $LOGDIR/gcc.log
+    echo "TEST REWRITE"
+    GIT_TRACE=1 GIT_TERMINAL_PROMPT=0 git ls-remote https://sourceware.org/git/newlib-cygwin.git HEAD
+    echo "TEST DONE"
+    git submodule sync --recursive -- "${SUBMODULES[@]}" 2>&1 | tee -a "$LOGDIR/gcc.log"
+    git submodule update --depth 1000 --jobs=4 --init --recursive -- "${SUBMODULES[@]}" 2>&1 | tee -a $LOGDIR/gcc.log
     if [[ "$GCC_URL" != "" ]]
     then
       echo "SKIP"
