@@ -1,3 +1,4 @@
+---
 name: RISC-V GNU Toolchain Builds
 
 on:
@@ -37,6 +38,12 @@ jobs:
       matrix:
         release: ${{ fromJson(needs.parse-metadata.outputs.releases) }}
     steps:
+      - name: Random startup splay (to prevent rate limiting)
+        shell: bash
+        run: |
+          delay=$((RANDOM % 61))
+          echo "Delaying this matrix job by ${delay}s"
+          sleep "$delay"
       - uses: actions/checkout@v6
       - name: Ensure release exists
         run: |
