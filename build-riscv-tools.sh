@@ -494,7 +494,7 @@ else
     git config --global --add url."https://github.com/RTEMS/sourceware-mirror-binutils-gdb".insteadOf "https://sourceware.org/git/binutils-gdb"
 
     # git config --global --add url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf "https://sourceware.org/git/newlib-cygwin.git"
-    ogit config --global --add url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin".insteadOf "https://sourceware.org/git/newlib-cygwin"
+    git config --global --add url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin".insteadOf "https://sourceware.org/git/newlib-cygwin"
 
     # git config --global --add url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git".insteadOf "https://github.com/bminor/newlib.git"
     git config --global --add url."https://github.com/RTEMS/sourceware-mirror-newlib-cygwin".insteadOf "https://github.com/bminor/newlib"
