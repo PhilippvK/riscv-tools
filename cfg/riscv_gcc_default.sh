@@ -10,3 +10,5 @@ export BINUTILS_URL=
 # export BINUTILS_REF=binutils-2_40-branch
 export BINUTILS_REF=
 export GNU_STRIP=true
+export GNU_GEN_MULTILIB_YAML=false
+export GNU_LLVM=false

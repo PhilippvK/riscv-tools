@@ -15,9 +15,10 @@ export LLVM_ENABLE_ZSTD=FORCE_ON
 export LLVM_DEFAULT_TARGET_TRIPLE="x86_64-pc-linux-gnu"
 # export LLVM_USE_LINKER=gold
 # export LLVM_DEFAULT_TARGET_TRIPLE=riscv32-unknown-elf-
-# export LLVM_ENABLE_RUNTIMES="compiler-rt;libcxx;libcxxabi;libunwind"
 # export DEFAULT_SYSROOT="../sysroot"
 # export LLVM_RUNTIME_TARGETS=?
 # export LLVM_INSTALL_TOOLCHAIN_ONLY=ON
 # CMAKE_BUILD_TYPE: Release
+# export LLVM_ENABLE_RUNTIMES="compiler-rt;libcxx;libcxxabi;libunwind"
+export LLVM_ENABLE_RUNTIMES="compiler-rt"
 export LLVM_STRIP=true

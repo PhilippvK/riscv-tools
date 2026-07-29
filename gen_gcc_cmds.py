@@ -36,6 +36,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--llvm-ref",
+        default=None,
+        help="Override LLVM ref (e.g. llvmorg-21.1.1)"
+    )
+
+    parser.add_argument(
         "--custom-name",
         default=None,
         help="Custom release name override"
@@ -52,6 +58,8 @@ def parse_args():
     parser.add_argument("--non-multilib", dest="NON_MULTILIB",
                         action=argparse.BooleanOptionalAction, default=True)
 
+    # parser.add_argument("--llvm", dest="LLVM", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--llvm", dest="LLVM", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--rvv", dest="RVV", action=argparse.BooleanOptionalAction, default=True)
 
     parser.add_argument("--linux", dest="LINUX", action=argparse.BooleanOptionalAction, default=True)
@@ -81,6 +89,8 @@ GNU_REF = args.gnu_ref
 GCC_REF = args.gcc_ref
 # CUSTOM_NAME = "2024.09.03"
 CUSTOM_NAME = args.custom_name
+GNU_LLVM = args.LLVM
+LLVM_REF = args.llvm_ref  # i.e. llvmorg-21.1.1
 
 RV32 = args.RV32
 RV64 = args.RV64
@@ -128,6 +138,11 @@ DEFAULT_CONFIG["HTIF_URL"] = "https://github.com/PhilippvK/libgloss-htif.git"
 DEFAULT_CONFIG["HTIF_REF"] = "multilib_fix"
 if GCC_REF:
     DEFAULT_CONFIG["GCC_REF"] = GCC_REF
+if LLVM_REF:
+    DEFAULT_CONFIG["LLVM_REF"] = LLVM_REF
+if GNU_LLVM:
+    DEFAULT_CONFIG["GNU_LLVM"] = True
+    DEFAULT_CONFIG["GNU_GEN_MULTILIB_YAML"] = True  # TODO: only for non-multilib and LLVM 21+
 
 VARIANTS = [
     *([("multilib_default", {"MULTILIB": True})] if MULTILIB_DEFAULT else []),
@@ -162,6 +177,20 @@ if GITHUB:
         else:
             gcc_ver = GCC_REF
         extra = f"GCC {gcc_ver}"
+    if GNU_LLVM:
+        tag = f"{tag}_llvm"
+        if LLVM_REF is not None:
+            llvm_version = LLVM_REF.replace("llvmorg-", "")
+            tag = f"{tag}_{llvm_ver}"
+            if extra is None:
+                extra = f"LLVM {llvm_ver}"
+            else:
+                extra = f"{extra} + LLVM {llvm_ver}"
+        else:
+            if extra is None:
+                extra = f"with LLVM"
+            else:
+                extra = f"{extra} with LLVM"
     dest = f"{OUT_DIR}/{tag}/"
 else:
     dest = f"{OUT_DIR}/{CUSTOM_NAME or GNU_REF}/Ubuntu"

@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN grep deb /etc/apt/sources.list | \
     sed 's/^deb/deb-src /g' >> /etc/apt/sources.list
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache libssl-dev \
+    apt-get install -y --no-install-recommends git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache libssl-dev lsb-release software-properties-common gnupg \
     && apt-get clean \
     && rm -rf /var/cache/apt/archives/ \
     && rm -rf /var/lib/apt/lists
@@ -26,3 +26,4 @@ RUN if [ "${ENABLE_CMAKE}" = "true" ] ; \
     && rm ./cmake.sh ; \
     fi
 ENV PATH="/opt/cmake/bin/:$PATH:"
+RUN bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"

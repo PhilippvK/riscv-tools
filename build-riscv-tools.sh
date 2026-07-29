@@ -82,6 +82,8 @@ LLVM_DEPTH=
 # TODO: move to cfg
 LLVM_STRIP=true
 GNU_STRIP=true
+GNU_GEN_MULTILIB_YAML=false
+GNU_LLVM=false
 DEDUP=false
 
 CMAKE_GENERATOR=Ninja
@@ -412,7 +414,7 @@ else
   then
       export DEBIAN_FRONTEND=noninteractive
       apt update
-      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache libssl-dev
+      apt install -y git autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build cmake libglib2.0-dev wget libzstd-dev python-is-python3 device-tree-compiler libboost-regex-dev libboost-system-dev libboost-filesystem-dev libboost-program-options-dev ccache libssl-dev lsb-release software-properties-common gnupg
       version=3.27
       build=7
       ## don't modify from here
@@ -433,6 +435,8 @@ else
       # which g++
       # which clang
       # which clang++
+      # Install latest clang
+      bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
       # echo PATH=$PATH
       # ls -l /usr/local/bin/gcc
       # ls -l /usr/local/bin/g++
@@ -595,6 +599,11 @@ else
         echo "Enable stripping"
         # CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --enable-strip"
     fi
+    if [[ "$GNU_LLVM" == true ]]
+    then
+        echo "Enable GNU-integrated LLVM"
+        CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --enable-llvm"  # Does not allow multilib! (TODO: fix with yaml)
+    fi
     # CONFIGURE_EXTRA_ARGS="$CONFIGURE_EXTRA_ARGS --disable-gdb"
     echo ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS"
     ../configure $CONFIGURE_EXTRA_ARGS --prefix=$INSTALLDIR/gnu $ARCH_ABI_ARGS $MULTILIB_ARGS "$MULTILIB_GEN_ARGS" 2>&1 | tee -a $LOGDIR/gcc.log
@@ -608,7 +617,18 @@ else
         date
         echo find $INSTALLDIR/gnu -type f -exec sh -c 'file "$1" | grep -q "ELF" && strip --strip-unneeded "$1"' _ {} \;
         find $INSTALLDIR/gnu -type f -exec sh -c 'file "$1" | grep -q "ELF" && strip --strip-unneeded "$1"' _ {} \;
-        date
+    fi
+    if [[ "$MULTILIB" == "true" && "$GNU_GEN_MULTILIB_YAML" == "true" ]]
+    then
+        wget https://raw.githubusercontent.com/kito-cheng/llvm-project/ba8a0a41a3cc20ed7106ee7c8ffcfa157c8e3249/llvm/utils/gen-riscv-multilib-yaml-from-gcc.py
+        if [[ "$GNU_LLVM" == true ]]
+        then
+            $INSTALLDIR/gnu/bin/$RISCV_HOST-gcc --print-multi-lib | python3 gen-riscv-multilib-yaml-from-gcc.py --clang $INSTALLDIR/gnu/bin/$RISCV_HOST-clang -o $INSTALLDIR/gnu/$RISCV_HOST/multilib.yaml
+        else
+            # Needs LLVM 20 or newer! (TODO: allow mixed gnu+llvm build?)
+            $INSTALLDIR/gnu/bin/$RISCV_HOST-gcc --print-multi-lib | python3 gen-riscv-multilib-yaml-from-gcc.py --clang $(which clang) -o $INSTALLDIR/gnu/$RISCV_HOST/multilib.yaml
+        fi
+
     fi
 
     cd ../..
@@ -718,9 +738,10 @@ else
     then
         # TODO: split
         CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_INSTALL_DO_STRIP=ON"
-        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON -DLLVM_BUILD_STATIC_LIBS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_BUILD_RUNTIME=OFF"
+        # CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON -DLLVM_BUILD_STATIC_LIBS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_DOCS=OFF -DLLVM_BUILD_RUNTIME=OFF"
+        CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON -DLLVM_BUILD_STATIC_LIBS=OFF -DLLVM_INCLUDE_TESTS=OFF -DLLVM_BUILD_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_BUILD_DOCS=OFF"
     fi
-    echo cmake -B "$WORKDIR/llvm/build" "$WORKDIR/llvm/llvm/" -G $CMAKE_GENERATOR -DLLVM_ENABLE_PROJECTS="$LLVM_ENABLE_PROJECTS" "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/llvm -DLLVM_TARGETS_TO_BUILD="$LLVM_TARGETS_TO_BUILD" -DLLVM_OPTIMIZED_TABLEGEN=$LLVM_OPTIMIZED_TABLEGEN -DLLVM_ENABLE_ASSERTIONS=$LLVM_ENABLE_ASSERTIONS -DLLVM_CCACHE_BUILD=$LLVM_CCACHE_BUILD -DLLVM_PARALLEL_LINK_JOBS=$LLVM_PARALLEL_LINK_JOBS -DLLVM_BUILD_TOOLS=$LLVM_BUILD_TOOLS -DLLVM_DEFAULT_TARGET_TRIPLE="$LLVM_DEFAULT_TARGET_TRIPLE" -DLLVM_ENABLE_ZSTD="$LLVM_ENABLE_ZSTD" $CMAKE_EXTRA_ARGS
+    echo cmake -B "$WORKDIR/llvm/build" "$WORKDIR/llvm/llvm/" -G $CMAKE_GENERATOR -DLLVM_ENABLE_PROJECTS="$LLVM_ENABLE_PROJECTS" "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/llvm -DLLVM_TARGETS_TO_BUILD="$LLVM_TARGETS_TO_BUILD" -DLLVM_OPTIMIZED_TABLEGEN=$LLVM_OPTIMIZED_TABLEGEN -DLLVM_ENABLE_ASSERTIONS=$LLVM_ENABLE_ASSERTIONS -DLLVM_CCACHE_BUILD=$LLVM_CCACHE_BUILD -DLLVM_PARALLEL_LINK_JOBS=$LLVM_PARALLEL_LINK_JOBS -DLLVM_BUILD_TOOLS=$LLVM_BUILD_TOOLS -DLLVM_DEFAULT_TARGET_TRIPLE="$LLVM_DEFAULT_TARGET_TRIPLE" -DLLVM_ENABLE_ZSTD="$LLVM_ENABLE_ZSTD" -DLLVM_ENABLE_RUNTIMES="$LLVM_ENABLE_RUNTIMES" $CMAKE_EXTRA_ARGS
     cmake -B "$WORKDIR/llvm/build" "$WORKDIR/llvm/llvm/" -G $CMAKE_GENERATOR -DLLVM_ENABLE_PROJECTS="$LLVM_ENABLE_PROJECTS" "-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE" -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/llvm -DLLVM_TARGETS_TO_BUILD="$LLVM_TARGETS_TO_BUILD" -DLLVM_OPTIMIZED_TABLEGEN=$LLVM_OPTIMIZED_TABLEGEN -DLLVM_ENABLE_ASSERTIONS=$LLVM_ENABLE_ASSERTIONS -DLLVM_CCACHE_BUILD=$LLVM_CCACHE_BUILD -DLLVM_PARALLEL_LINK_JOBS=$LLVM_PARALLEL_LINK_JOBS -DLLVM_BUILD_TOOLS=$LLVM_BUILD_TOOLS -DLLVM_DEFAULT_TARGET_TRIPLE="$LLVM_DEFAULT_TARGET_TRIPLE" -DLLVM_ENABLE_ZSTD="$LLVM_ENABLE_ZSTD" $CMAKE_EXTRA_ARGS 2>&1 | tee -a $LOGDIR/llvm.log
 
     cmake --build "$WORKDIR/llvm/build" -j`nproc` 2>&1 | tee -a $LOGDIR/llvm.log
