@@ -881,6 +881,7 @@ else
     then
       git checkout $ETISS_PERF_REF 2>&1 | tee -a $LOGDIR/etiss_perf.log
     fi
+    git submodule update --init --recursive
     if [[ "$ETISS_URL" != "" ]]
     then
       git -C etiss remote set-url origin $ETISS_URL 2>&1 | tee -a $LOGDIR/etiss_perf.log
