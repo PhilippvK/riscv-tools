@@ -1,0 +1,14 @@
+{
+  "releases": [
+    {
+      "tag": "etiss_develop",
+      "title": "ETISS develop",
+      "dest": "$GITHUB_WORKSPACE/upload/etiss_develop",
+      "commands": [
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-20.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:20.04 --dest $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-20.04 ETISS_REF=develop && mv $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-20.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-20.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-22.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:22.04 --dest $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-22.04 ETISS_REF=develop && mv $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-22.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-22.04.tar.xz",
+        "mkdir -p $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-24.04 && ./build-riscv-tools.sh --compress --force --setup etiss --docker ubuntu:24.04 --dest $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-24.04 ETISS_REF=develop && mv $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-24.04/etiss.tar.xz $GITHUB_WORKSPACE/upload/etiss_develop//etiss-x86_64-linux-gnu-ubuntu-24.04.tar.xz"
+      ]
+    }
+  ]
+}
