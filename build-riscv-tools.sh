@@ -862,7 +862,7 @@ else
       git checkout $ETISS_REF 2>&1 | tee -a $LOGDIR/etiss.log
     fi
     git submodule update --init --recursive
-    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/etiss -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DPORTABLE_INSTALL=ON 2>&1 | tee -a $LOGDIR/etiss.log
+    cmake -S . -B build -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/etiss -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DPORTABLE_INSTALL=ON -DETISS_PORTABLE_INSTALL=ON 2>&1 | tee -a $LOGDIR/etiss.log
     cmake --build build -j`nproc` 2>&1 | tee -a $LOGDIR/etiss.log
     cmake --install build 2>&1 | tee -a $LOGDIR/etiss.log
     cd ../
